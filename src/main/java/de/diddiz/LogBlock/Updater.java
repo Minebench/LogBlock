@@ -3,6 +3,7 @@ package de.diddiz.LogBlock;
 import de.diddiz.LogBlock.config.Config;
 import de.diddiz.LogBlock.config.WorldConfig;
 import de.diddiz.util.UUIDFetcher;
+import net.zaiyers.UUIDDB.bukkit.UUIDDB;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -287,7 +288,24 @@ class Updater {
                     } while (rs.next());
                     if (names.size() > 0) {
                         String theUUID;
-                        response = UUIDFetcher.getUUIDs(names);
+                        if(logblock.getServer().getPluginManager().getPlugin("UUIDDB") != null) {
+                            response = new HashMap<String, UUID>();
+                            List<String> unknown = new ArrayList<String>();
+                            for(String name : names) {
+                                String idstring = UUIDDB.getInstance().getStorage().getUUIDByName(name);
+                                if(idstring != null) {
+                                    response.put(name, UUID.fromString(idstring));
+                                } else {
+                                    unknown.add(name);
+                                }
+                            }
+                            if(unknown.size() > 0) {
+                                response.putAll(UUIDFetcher.getUUIDs(unknown));
+                            }
+                            getLogger().info("Could not find " + Integer.toString(unknown.size()) + " players in UUIDDB. Looked them up with Mojang!");
+                        } else {
+                            response = UUIDFetcher.getUUIDs(names);
+                        }
                         for (Map.Entry<String, Integer> entry : players.entrySet()) {
                             if (response.get(entry.getKey()) == null) {
                                 theUUID = unimportedPrefix + entry.getKey();
