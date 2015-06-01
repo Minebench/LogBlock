@@ -4,6 +4,7 @@ import de.diddiz.LogBlock.config.Config;
 import de.diddiz.LogBlock.config.WorldConfig;
 import de.diddiz.util.UUIDFetcher;
 import net.zaiyers.UUIDDB.bukkit.UUIDDB;
+import net.zaiyers.UUIDDB.core.Storage;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -289,15 +290,23 @@ class Updater {
                     if (names.size() > 0) {
                         String theUUID;
                         if(logblock.getServer().getPluginManager().getPlugin("UUIDDB") != null) {
+                            Storage uuidStorage = UUIDDB.getInstance().getStorage();
+                            if(uuidStorage == null)
+                                getLogger().warning("UUIDDB storage is null!");
                             response = new HashMap<String, UUID>();
                             List<String> unknown = new ArrayList<String>();
                             for(String name : names) {
-                                String idstring = UUIDDB.getInstance().getStorage().getUUIDByName(name);
-                                if(idstring != null) {
-                                    response.put(name, UUID.fromString(idstring));
-                                } else {
-                                    unknown.add(name);
+                                if(uuidStorage != null) {
+                                    String idstring = uuidStorage.getUUIDByName(name);
+                                    if (idstring != null) {
+                                        try {
+                                            response.put(name, UUID.fromString(idstring));
+                                            continue;
+                                        } catch (IllegalArgumentException e) {
+                                        }
+                                    }
                                 }
+                                unknown.add(name);
                             }
                             if(unknown.size() > 0) {
                                 response.putAll(UUIDFetcher.getUUIDs(unknown));
