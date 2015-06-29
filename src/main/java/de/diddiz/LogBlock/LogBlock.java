@@ -149,12 +149,14 @@ public class LogBlock extends JavaPlugin {
         }
         if (isLogging(Logging.BLOCKPLACE)) {
             pm.registerEvents(new BlockPlaceLogging(this), this);
+            pm.registerEvents(new PseudoBlockPlaceLogging(this), this);
         }
         if (isLogging(Logging.BLOCKPLACE) || isLogging(Logging.LAVAFLOW) || isLogging(Logging.WATERFLOW)) {
             pm.registerEvents(new FluidFlowLogging(this), this);
         }
         if (isLogging(Logging.BLOCKBREAK)) {
             pm.registerEvents(new BlockBreakLogging(this), this);
+            pm.registerEvents(new PseudoBlockBreakLogging(this), this);
         }
         if (isLogging(Logging.SIGNTEXT)) {
             pm.registerEvents(new SignChangeLogging(this), this);
