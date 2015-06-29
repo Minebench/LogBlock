@@ -4,6 +4,7 @@ import de.diddiz.LogBlock.Actor;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.Logging;
 import de.diddiz.LogBlock.config.WorldConfig;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -53,13 +54,13 @@ public class PseudoBlockBreakLogging extends LoggingListener {
             int id = 0;
             switch(event.getEntity().getType()) {
                 case PAINTING:
-                    id = 321;
+                    id = Material.PAINTING.getId();
                     break;
                 case ITEM_FRAME:
-                    id = 389;
+                    id = Material.ITEM_FRAME.getId();
                     break;
                 case LEASH_HITCH:
-                    id = 420;
+                    id = Material.LEASH.getId();
                     break;
             }
             if(id != 0) {
