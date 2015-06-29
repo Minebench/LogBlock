@@ -1,6 +1,6 @@
 package de.diddiz.LogBlock.listeners;
 
-import com.sun.deploy.util.ArrayUtil;
+import com.sk89q.util.StringUtil;
 import de.diddiz.LogBlock.Actor;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.Logging;
@@ -40,7 +40,7 @@ public class PseudoBlockPlaceLogging extends LoggingListener {
                     if(nearbyPlayers.size() == 1) {
                         actor = Actor.actorFromEntity(nearbyPlayers.get(0));
                     } else if(nearbyPlayers.size() > 1) {
-                        actor = new Actor("One of " + ArrayUtil.arrayToString(nearbyPlayers.toArray(new String[0])));
+                        actor = new Actor("One of " + StringUtil.joinString(nearbyPlayers, ",", 0));
                     }
                     consumer.queueBlockPlace(actor, event.getLocation(), 416, (byte) 0);
                 }
