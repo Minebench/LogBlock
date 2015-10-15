@@ -16,6 +16,8 @@ import java.util.logging.Level;
 import static de.diddiz.LogBlock.config.Config.getLoggedWorlds;
 import static de.diddiz.LogBlock.config.Config.isLogging;
 import static de.diddiz.util.BukkitUtils.friendlyWorldname;
+import de.diddiz.util.ComparableVersion;
+import java.util.regex.Pattern;
 import static org.bukkit.Bukkit.getLogger;
 
 class Updater {
@@ -28,11 +30,18 @@ class Updater {
 
     boolean update() {
         final ConfigurationSection config = logblock.getConfig();
-        if (config.getString("version").compareTo(logblock.getDescription().getVersion()) >= 0) {
+        String versionString = config.getString("version");
+        if (Pattern.matches("1\\.\\d{2}",versionString)) {
+            versionString = "1." + versionString.charAt(2) + "." + versionString.charAt(3);
+            config.set("version",versionString);
+            logblock.saveConfig();
+        }
+        ComparableVersion configVersion = new ComparableVersion(versionString);
+        if (configVersion.compareTo(new ComparableVersion(logblock.getDescription().getVersion())) >= 0) {
             return false;
         }
-        if (config.getString("version").compareTo("1.27") < 0) {
-            getLogger().info("Updating tables to 1.27 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.2.7")) < 0) {
+            getLogger().info("Updating tables to 1.2.7 ...");
             if (isLogging(Logging.CHAT)) {
                 final Connection conn = logblock.getConnection();
                 try {
@@ -46,19 +55,19 @@ class Updater {
                     return false;
                 }
             }
-            config.set("version", "1.27");
+            config.set("version", "1.2.7");
         }
-        if (config.getString("version").compareTo("1.30") < 0) {
-            getLogger().info("Updating config to 1.30 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.3")) < 0) {
+            getLogger().info("Updating config to 1.3.0 ...");
             for (final String tool : config.getConfigurationSection("tools").getKeys(false)) {
                 if (config.get("tools." + tool + ".permissionDefault") == null) {
                     config.set("tools." + tool + ".permissionDefault", "OP");
                 }
             }
-            config.set("version", "1.30");
+            config.set("version", "1.3.0");
         }
-        if (config.getString("version").compareTo("1.31") < 0) {
-            getLogger().info("Updating tables to 1.31 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.3.1")) < 0) {
+            getLogger().info("Updating tables to 1.3.1 ...");
             final Connection conn = logblock.getConnection();
             try {
                 conn.setAutoCommit(true);
@@ -70,10 +79,10 @@ class Updater {
                 Bukkit.getLogger().log(Level.SEVERE, "[Updater] Error: ", ex);
                 return false;
             }
-            config.set("version", "1.31");
+            config.set("version", "1.3.1");
         }
-        if (config.getString("version").compareTo("1.32") < 0) {
-            getLogger().info("Updating tables to 1.32 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.3.2")) < 0) {
+            getLogger().info("Updating tables to 1.3.2 ...");
             final Connection conn = logblock.getConnection();
             try {
                 conn.setAutoCommit(true);
@@ -85,15 +94,15 @@ class Updater {
                 Bukkit.getLogger().log(Level.SEVERE, "[Updater] Error: ", ex);
                 return false;
             }
-            config.set("version", "1.32");
+            config.set("version", "1.3.2");
         }
-        if (config.getString("version").compareTo("1.40") < 0) {
-            getLogger().info("Updating config to 1.40 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.4")) < 0) {
+            getLogger().info("Updating config to 1.4.0 ...");
             config.set("clearlog.keepLogDays", null);
-            config.set("version", "1.40");
+            config.set("version", "1.4.0");
         }
-        if (config.getString("version").compareTo("1.42") < 0) {
-            getLogger().info("Updating config to 1.42 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.4.2")) < 0) {
+            getLogger().info("Updating config to 1.4.2 ...");
             for (final String world : config.getStringList("loggedWorlds")) {
                 final File file = new File(logblock.getDataFolder(), friendlyWorldname(world) + ".yml");
                 final YamlConfiguration wcfg = YamlConfiguration.loadConfiguration(file);
@@ -176,10 +185,10 @@ class Updater {
                 }
             }
             config.set("clearlog.keepLogDays", null);
-            config.set("version", "1.42");
+            config.set("version", "1.4.2");
         }
-        if (config.getString("version").compareTo("1.51") < 0) {
-            getLogger().info("Updating tables to 1.51 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.5.1")) < 0) {
+            getLogger().info("Updating tables to 1.5.1 ...");
             final Connection conn = logblock.getConnection();
             try {
                 conn.setAutoCommit(true);
@@ -195,10 +204,10 @@ class Updater {
                 Bukkit.getLogger().log(Level.SEVERE, "[Updater] Error: ", ex);
                 return false;
             }
-            config.set("version", "1.51");
+            config.set("version", "1.5.1");
         }
-        if (config.getString("version").compareTo("1.52") < 0) {
-            getLogger().info("Updating tables to 1.52 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.5.2")) < 0) {
+            getLogger().info("Updating tables to 1.5.2 ...");
             final Connection conn = logblock.getConnection();
             try {
                 conn.setAutoCommit(true);
@@ -218,10 +227,10 @@ class Updater {
                 Bukkit.getLogger().log(Level.SEVERE, "[Updater] Error: ", ex);
                 return false;
             }
-            config.set("version", "1.52");
+            config.set("version", "1.5.2");
         }
-        if (config.getString("version").compareTo("1.81") < 0) {
-            getLogger().info("Updating tables to 1.81 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.8.1")) < 0) {
+            getLogger().info("Updating tables to 1.8.1 ...");
             final Connection conn = logblock.getConnection();
             try {
                 conn.setAutoCommit(true);
@@ -238,11 +247,11 @@ class Updater {
                 Bukkit.getLogger().log(Level.SEVERE, "[Updater] Error: ", ex);
                 return false;
             }
-            config.set("version", "1.81");
+            config.set("version", "1.8.1");
         }
 
-        if (config.getString("version").compareTo("1.90") < 0) {
-            getLogger().info("Updating tables to 1.9 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.9")) < 0) {
+            getLogger().info("Updating tables to 1.9.0 ...");
             getLogger().info("Importing UUIDs for large databases may take some time");
             final Connection conn = logblock.getConnection();
             try {
@@ -316,50 +325,10 @@ class Updater {
                 Bukkit.getLogger().log(Level.SEVERE, "[UUID importer]", ex);
                 return false;
             }
-            config.set("version", "1.90");
+            config.set("version", "1.9.0");
         }
-        // Ensure charset for free-text fields is UTF-8, or UTF8-mb4 if possible
-        // As this may be an expensive operation and the database default may already be this, check on a table-by-table basis before converting
-        if (config.getString("version").compareTo("1.92") < 0) {
-            getLogger().info("Updating tables to 1.92 ...");
-            String charset = "utf8";
-            if (Config.mb4) {
-                charset = "utf8mb4";
-            }
-            final Connection conn = logblock.getConnection();
-            try {
-                conn.setAutoCommit(true);
-                final Statement st = conn.createStatement();
-                if (isLogging(Logging.CHAT)) {
-                    final ResultSet rs = st.executeQuery("SHOW FULL COLUMNS FROM `lb-chat` WHERE field = 'message'");
-                    if (rs.next() && !rs.getString("Collation").substring(0, 4).equalsIgnoreCase(charset)) {
-                        st.execute("ALTER TABLE `lb-chat` CONVERT TO CHARSET " + charset);
-                        getLogger().info("Table lb-chat modified");
-                    } else {
-                        getLogger().info("Table lb-chat already fine, skipping it");
-                    }
-                }
-                for (final WorldConfig wcfg : getLoggedWorlds()) {
-                    if (wcfg.isLogging(Logging.SIGNTEXT)) {
-                        final ResultSet rs = st.executeQuery("SHOW FULL COLUMNS FROM `" + wcfg.table + "-sign` WHERE field = 'signtext'");
-                        if (rs.next() && !rs.getString("Collation").substring(0, 4).equalsIgnoreCase(charset)) {
-                            st.execute("ALTER TABLE `" + wcfg.table + "-sign` CONVERT TO CHARSET " + charset);
-                            getLogger().info("Table " + wcfg.table + "-sign modified");
-                        } else {
-                            getLogger().info("Table " + wcfg.table + "-sign already fine, skipping it");
-                        }
-                    }
-                }
-                st.close();
-                conn.close();
-            } catch (final SQLException ex) {
-                Bukkit.getLogger().log(Level.SEVERE, "[Updater] Error: ", ex);
-                return false;
-            }
-            config.set("version", "1.92");
-        }
-        if (config.getString("version").compareTo("1.94") < 0) {
-            getLogger().info("Updating tables to 1.94 ...");
+        if (configVersion.compareTo(new ComparableVersion("1.9.4")) < 0) {
+            getLogger().info("Updating tables to 1.9.4 ...");
             final Connection conn = logblock.getConnection();
             try {
                 conn.setAutoCommit(true);
@@ -389,14 +358,57 @@ class Updater {
                 Bukkit.getLogger().log(Level.SEVERE, "[Updater] Error: ", ex);
                 return false;
             }
-            config.set("version", "1.94");
+            config.set("version", "1.9.4");
+        }
+        // Ensure charset for free-text fields is UTF-8, or UTF8-mb4 if possible
+        // As this may be an expensive operation and the database default may already be this, check on a table-by-table basis before converting
+        if (configVersion.compareTo(new ComparableVersion("1.10.0")) < 0) {
+            getLogger().info("Updating tables to 1.10.0 ...");
+            final Connection conn = logblock.getConnection();
+            try {
+                conn.setAutoCommit(true);
+                final Statement st = conn.createStatement();
+                checkCharset("lb-players","name",st);
+                if (isLogging(Logging.CHAT)) {
+                    checkCharset("lb-chat","message", st);
+                }
+                for (final WorldConfig wcfg : getLoggedWorlds()) {
+                    if (wcfg.isLogging(Logging.SIGNTEXT)) {
+                        checkCharset(wcfg.table + "-sign","signtext",st);
+                    }
+                }
+                st.close();
+                conn.close();
+            } catch (final SQLException ex) {
+                Bukkit.getLogger().log(Level.SEVERE, "[Updater] Error: ", ex);
+                return false;
+            }
+            config.set("version", "1.10.0");
         }
 
         logblock.saveConfig();
         return true;
     }
 
+    void checkCharset(String table, String column, Statement st) throws SQLException {
+        final ResultSet rs = st.executeQuery("SHOW FULL COLUMNS FROM `" + table + "` WHERE field = '" + column + "'");
+        String charset = "utf8";
+        if (Config.mb4) {
+            charset = "utf8mb4";
+        }
+        if (rs.next() && !rs.getString("Collation").substring(0, charset.length()).equalsIgnoreCase(charset)) {
+            st.execute("ALTER TABLE `" + table + "` CONVERT TO CHARSET " + charset);
+            getLogger().info("Table " + table + " modified");
+        } else {
+            getLogger().info("Table " + table + " already fine, skipping it");
+        }
+    }
+
     void checkTables() throws SQLException {
+        String charset = "utf8";
+        if (Config.mb4) {
+            charset = "utf8mb4";
+        }
         final Connection conn = logblock.getConnection();
         if (conn == null) {
             throw new SQLException("No connection");
@@ -404,18 +416,18 @@ class Updater {
         final Statement state = conn.createStatement();
         final DatabaseMetaData dbm = conn.getMetaData();
         conn.setAutoCommit(true);
-        createTable(dbm, state, "lb-players", "(playerid INT UNSIGNED NOT NULL AUTO_INCREMENT, UUID varchar(36) NOT NULL, playername varchar(32) NOT NULL, firstlogin DATETIME NOT NULL, lastlogin DATETIME NOT NULL, onlinetime INT UNSIGNED NOT NULL, ip varchar(255) NOT NULL, PRIMARY KEY (playerid), INDEX (UUID), INDEX (playername))");
+        createTable(dbm, state, "lb-players", "(playerid INT UNSIGNED NOT NULL AUTO_INCREMENT, UUID varchar(36) NOT NULL, playername varchar(32) NOT NULL, firstlogin DATETIME NOT NULL, lastlogin DATETIME NOT NULL, onlinetime INT UNSIGNED NOT NULL, ip varchar(255) NOT NULL, PRIMARY KEY (playerid), INDEX (UUID), INDEX (playername)) DEFAULT CHARSET " + charset);
         // Players table must not be empty or inserts won't work - bug #492
         final ResultSet rs = state.executeQuery("SELECT NULL FROM `lb-players` LIMIT 1;");
         if (!rs.next()) {
             state.execute("INSERT IGNORE INTO `lb-players` (UUID,playername) VALUES ('log_dummy_record','dummy_record')");
         }
         if (isLogging(Logging.CHAT)) {
-            createTable(dbm, state, "lb-chat", "(id INT UNSIGNED NOT NULL AUTO_INCREMENT, date DATETIME NOT NULL, playerid INT UNSIGNED NOT NULL, message VARCHAR(255) NOT NULL, PRIMARY KEY (id), KEY playerid (playerid), FULLTEXT message (message)) ENGINE=MyISAM DEFAULT CHARSET utf8");
+            createTable(dbm, state, "lb-chat", "(id INT UNSIGNED NOT NULL AUTO_INCREMENT, date DATETIME NOT NULL, playerid INT UNSIGNED NOT NULL, message VARCHAR(255) NOT NULL, PRIMARY KEY (id), KEY playerid (playerid), FULLTEXT message (message)) ENGINE=MyISAM DEFAULT CHARSET " + charset);
         }
         for (final WorldConfig wcfg : getLoggedWorlds()) {
             createTable(dbm, state, wcfg.table, "(id INT UNSIGNED NOT NULL AUTO_INCREMENT, date DATETIME NOT NULL, playerid INT UNSIGNED NOT NULL, replaced TINYINT UNSIGNED NOT NULL, type TINYINT UNSIGNED NOT NULL, data TINYINT UNSIGNED NOT NULL, x MEDIUMINT NOT NULL, y SMALLINT UNSIGNED NOT NULL, z MEDIUMINT NOT NULL, PRIMARY KEY (id), KEY coords (x, z, y), KEY date (date), KEY playerid (playerid))");
-            createTable(dbm, state, wcfg.table + "-sign", "(id INT UNSIGNED NOT NULL, signtext VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARSET utf8");
+            createTable(dbm, state, wcfg.table + "-sign", "(id INT UNSIGNED NOT NULL, signtext VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARSET " + charset);
             createTable(dbm, state, wcfg.table + "-chest", "(id INT UNSIGNED NOT NULL, itemtype SMALLINT UNSIGNED NOT NULL, itemamount SMALLINT NOT NULL, itemdata SMALLINT NOT NULL, PRIMARY KEY (id))");
             if (wcfg.isLogging(Logging.KILL)) {
                 createTable(dbm, state, wcfg.table + "-kills", "(id INT UNSIGNED NOT NULL AUTO_INCREMENT, date DATETIME NOT NULL, killer INT UNSIGNED, victim INT UNSIGNED NOT NULL, weapon SMALLINT UNSIGNED NOT NULL, x MEDIUMINT NOT NULL, y SMALLINT NOT NULL, z MEDIUMINT NOT NULL, PRIMARY KEY (id))");

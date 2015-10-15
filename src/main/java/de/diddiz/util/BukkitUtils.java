@@ -175,8 +175,8 @@ public class BukkitUtils {
     /**
      * Returns a list of block locations around the block that are of the type specified by the integer list parameter
      *
-     * @param block
-     * @param type
+     * @param block The central block to get the blocks around
+     * @param type The type of blocks around the center block to return
      * @return List of block locations around the block that are of the type specified by the integer list parameter
      */
     public static List<Location> getBlocksNearby(org.bukkit.block.Block block, Set<Material> type) {
@@ -204,7 +204,7 @@ public class BukkitUtils {
 
     public static int getInventoryHolderType(InventoryHolder holder) {
         if (holder instanceof DoubleChest) {
-            return ((DoubleChest) holder).getLocation().getBlock().getTypeId();
+            return getInventoryHolderType(((DoubleChest) holder).getLeftSide());
         } else if (holder instanceof BlockState) {
             return ((BlockState) holder).getTypeId();
         } else {
@@ -214,7 +214,7 @@ public class BukkitUtils {
 
     public static Location getInventoryHolderLocation(InventoryHolder holder) {
         if (holder instanceof DoubleChest) {
-            return ((DoubleChest) holder).getLocation();
+            return getInventoryHolderLocation(((DoubleChest) holder).getLeftSide());
         } else if (holder instanceof BlockState) {
             return ((BlockState) holder).getLocation();
         } else {
