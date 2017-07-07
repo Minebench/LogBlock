@@ -92,7 +92,6 @@ public class ExplosionLogging extends LoggingListener {
                     return;
                 }
                 actor = Actor.actorFromEntity(source);
-
             } else {
                 if (!wcfg.isLogging(Logging.MISCEXPLOSION)) {
                     return;
