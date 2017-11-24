@@ -4,20 +4,27 @@ import de.diddiz.LogBlock.Actor;
 import de.diddiz.LogBlock.ChestAccess;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.event.HandlerList;
+import org.bukkit.material.Sign;
 
 public class BlockChangePreLogEvent extends PreLogEvent {
 
     private static final HandlerList handlers = new HandlerList();
     private Location location;
-    private int typeBefore, typeAfter;
+    private Material typeBefore, typeAfter;
     private byte data;
     private String signText;
     private ChestAccess chestAccess;
 
+    @Deprecated
     public BlockChangePreLogEvent(Actor owner, Location location, int typeBefore, int typeAfter, byte data,
                                   String signText, ChestAccess chestAccess) {
-
+        this(owner, location, Material.getMaterial(typeBefore), Material.getMaterial(typeAfter), data, signText, chestAccess);
+    }
+    
+    public BlockChangePreLogEvent(Actor owner, Location location, Material typeBefore, Material typeAfter, byte data,
+                                  String signText, ChestAccess chestAccess) {
         super(owner);
         this.location = location;
         this.typeBefore = typeBefore;
@@ -37,22 +44,23 @@ public class BlockChangePreLogEvent extends PreLogEvent {
         this.location = location;
     }
 
-    public int getTypeBefore() {
+    
+    public Material getTypeBefore() {
 
         return typeBefore;
     }
 
-    public void setTypeBefore(int typeBefore) {
+    public void setTypeBefore(Material typeBefore) {
 
         this.typeBefore = typeBefore;
     }
 
-    public int getTypeAfter() {
+    public Material getTypeAfter() {
 
         return typeAfter;
     }
 
-    public void setTypeAfter(int typeAfter) {
+    public void setTypeAfter(Material typeAfter) {
 
         this.typeAfter = typeAfter;
     }
@@ -90,13 +98,13 @@ public class BlockChangePreLogEvent extends PreLogEvent {
 
     private boolean isValidSign() {
 
-        if ((typeAfter == 63 || typeAfter == 68) && typeBefore == 0) {
+        if (typeAfter.getData() == Sign.class && typeBefore == Material.AIR) {
             return true;
         }
-        if ((typeBefore == 63 || typeBefore == 68) && typeAfter == 0) {
+        if (typeBefore.getData() == Sign.class && typeAfter == Material.AIR) {
             return true;
         }
-        if ((typeAfter == 63 || typeAfter == 68) && typeBefore == typeAfter) {
+        if (typeAfter.getData() == Sign.class && typeBefore == typeAfter) {
             return true;
         }
         return false;

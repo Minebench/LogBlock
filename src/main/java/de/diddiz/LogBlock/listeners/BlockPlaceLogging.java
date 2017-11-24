@@ -55,9 +55,9 @@ public class BlockPlaceLogging extends LoggingListener {
                     // Run this check to avoid false positives
                     if (!BukkitUtils.getFallingEntityKillers().contains(finalLoc.getBlock().getType())) {
                         if (finalLoc.getBlock().getType() == Material.AIR || finalLoc.equals(event.getBlock().getLocation())) {
-                            consumer.queueBlockPlace(actor, finalLoc, type.getId(), event.getBlock().getData());
+                            consumer.queueBlockPlace(actor, finalLoc, type, event.getBlock().getData());
                         } else {
-                            consumer.queueBlockReplace(actor, finalLoc, finalLoc.getBlock().getTypeId(), finalLoc.getBlock().getData(), type.getId(), event.getBlock().getData());
+                            consumer.queueBlockReplace(actor, finalLoc, finalLoc.getBlock().getType(), finalLoc.getBlock().getData(), type, event.getBlock().getData());
                         }
                     }
                 }
@@ -86,7 +86,12 @@ public class BlockPlaceLogging extends LoggingListener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
         if (isLogging(event.getPlayer().getWorld(), Logging.BLOCKPLACE)) {
-            consumer.queueBlockPlace(Actor.actorFromEntity(event.getPlayer()), event.getBlockClicked().getRelative(event.getBlockFace()).getLocation(), event.getBucket() == Material.WATER_BUCKET ? 9 : 11, (byte) 0);
+            consumer.queueBlockPlace(
+                    Actor.actorFromEntity(event.getPlayer()),
+                    event.getBlockClicked().getRelative(event.getBlockFace()).getLocation(),
+                    event.getBucket() == Material.WATER_BUCKET ? Material.STATIONARY_WATER : Material.STATIONARY_LAVA,
+                    (byte) 0
+            );
         }
     }
 }

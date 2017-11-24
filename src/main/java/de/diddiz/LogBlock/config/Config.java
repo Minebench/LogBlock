@@ -40,11 +40,10 @@ public class Config {
     public static int linesPerPage, linesLimit;
     public static boolean askRollbacks, askRedos, askClearLogs, askClearLogAfterRollback, askRollbackAfterBan;
     public static String banPermission;
-    public static Set<Integer> hiddenBlocks;
+    public static Set<Material> hiddenBlocks;
     public static Set<String> hiddenPlayers;
     public static Set<String> ignoredChat;
     public static SimpleDateFormat formatter;
-    public static boolean safetyIdCheck;
     public static boolean debug;
     public static boolean logEnvironmentalKills;
     // Not loaded from config - checked at runtime
@@ -161,11 +160,11 @@ public class Config {
         for (final String playerName : config.getStringList("logging.hiddenPlayers")) {
             hiddenPlayers.add(playerName.toLowerCase().trim());
         }
-        hiddenBlocks = new HashSet<Integer>();
+        hiddenBlocks = EnumSet.noneOf(Material.class);
         for (final Object blocktype : config.getList("logging.hiddenBlocks")) {
             final Material mat = Material.matchMaterial(String.valueOf(blocktype));
             if (mat != null) {
-                hiddenBlocks.add(mat.getId());
+                hiddenBlocks.add(mat);
             } else {
                 throw new DataFormatException("Not a valid material: '" + blocktype + "'");
             }
@@ -187,7 +186,6 @@ public class Config {
         askClearLogs = config.getBoolean("questioner.askClearLogs", true);
         askClearLogAfterRollback = config.getBoolean("questioner.askClearLogAfterRollback", true);
         askRollbackAfterBan = config.getBoolean("questioner.askRollbackAfterBan", false);
-        safetyIdCheck = config.getBoolean("safety.id.check", true);
         debug = config.getBoolean("debug", false);
         banPermission = config.getString("questioner.banPermission");
         final List<Tool> tools = new ArrayList<Tool>();

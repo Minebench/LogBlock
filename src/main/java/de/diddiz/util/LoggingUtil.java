@@ -50,9 +50,9 @@ public class LoggingUtil {
                 if (!BukkitUtils.getFallingEntityKillers().contains(finalLoc.getBlock().getType())) {
                     finalLoc.add(0, up, 0); // Add this here after checking for block breakers
                     if (finalLoc.getBlock().getType() == Material.AIR || BukkitUtils.getRelativeTopFallables().contains(finalLoc.getBlock().getType())) {
-                        consumer.queueBlockPlace(actor, finalLoc, checkBlock.getTypeId(), checkBlock.getData());
+                        consumer.queueBlockPlace(actor, finalLoc, checkBlock.getType(), checkBlock.getData());
                     } else {
-                        consumer.queueBlockReplace(actor, finalLoc, finalLoc.getBlock().getTypeId(), finalLoc.getBlock().getData(), checkBlock.getTypeId(), checkBlock.getData());
+                        consumer.queueBlockReplace(actor, finalLoc, finalLoc.getBlock().getType(), finalLoc.getBlock().getData(), checkBlock.getType(), checkBlock.getData());
                     }
                     up++;
                 }

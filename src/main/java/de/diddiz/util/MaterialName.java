@@ -25,7 +25,7 @@ public class MaterialName {
     static {
         // Add all known materials
         for (final Material mat : Material.values()) {
-            materialNames.put(mat.getId(), mat.toString().replace('_', ' ').toLowerCase());
+            materialNames.put(mat.getId(), toReadable(mat.toString()));
         }
         // Load config
         final File file = new File(LogBlock.getInstance().getDataFolder(), "materials.yml");
@@ -236,9 +236,21 @@ public class MaterialName {
      *
      * @param type The type of the material
      * @return Name of the material, or if it's unknown, the id.
+     * @deprecated Use {@link #materialName(Material)}
      */
+    @Deprecated
     public static String materialName(int type) {
         return materialNames.containsKey(type) ? materialNames.get(type) : String.valueOf(type);
+    }
+    
+    /**
+     * Returns the name of a material
+     *
+     * @param type The material
+     * @return Name of the material, or if it's unknown, the id.
+     */
+    public static String materialName(Material type) {
+        return materialNames.containsKey(type.getId()) ? materialNames.get(type.getId()) : String.valueOf(type);
     }
 
     /**
@@ -247,7 +259,9 @@ public class MaterialName {
      * @param type The type of the material
      * @param data The data of the material
      * @return Name of the material regarding it's data, or if it's unknown, the basic name.
+     * @deprecated Use {@link #materialName(Material, short)}
      */
+    @Deprecated
     public static String materialName(int type, short data) {
         final Map<Short, String> dataNames = materialDataNames.get(type);
         if (dataNames != null) {
@@ -257,17 +271,34 @@ public class MaterialName {
         }
         return materialName(type);
     }
+    
+    /**
+     * Returns the name of a material and data
+     *
+     * @param type The material
+     * @param data The data
+     * @return Name of the material regarding it's data, or if it's unknown, the basic name.
+     */
+    public static String materialName(Material type, short data) {
+        final Map<Short, String> dataNames = materialDataNames.get(type.getId());
+        if (dataNames != null) {
+            if (dataNames.containsKey(data)) {
+                return dataNames.get(data);
+            }
+        }
+        return materialName(type);
+    }
 
-    public static Integer typeFromName(String name) {
+    public static Material typeFromName(String name) {
         Integer answer = nameTypes.get(toReadable(name));
         if (answer != null) {
-            return answer;
+            return Material.getMaterial(answer);
         }
         final Material mat = Material.matchMaterial(name);
         if (mat == null) {
             throw new IllegalArgumentException("No material matching: '" + name + "'");
         }
-        return mat.getId();
+        return mat;
     }
 
     private static String toReadable(MaterialData matData) {

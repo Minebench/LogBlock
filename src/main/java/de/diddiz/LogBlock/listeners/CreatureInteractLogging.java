@@ -36,15 +36,13 @@ public class CreatureInteractLogging extends LoggingListener {
         if (wcfg != null) {
             final Block clicked = event.getBlock();
             final Material type = clicked.getType();
-            final int typeId = type.getId();
             final byte blockData = clicked.getData();
             final Location loc = clicked.getLocation();
 
             switch (type) {
                 case SOIL:
                     if (wcfg.isLogging(Logging.CREATURECROPTRAMPLE)) {
-                        // 3 = Dirt ID
-                        consumer.queueBlock(Actor.actorFromEntity(entityType), loc, typeId, 3, blockData);
+                        consumer.queueBlock(Actor.actorFromEntity(entityType), loc, type, Material.DIRT, blockData);
                         // Log the crop on top as being broken
                         Block trampledCrop = clicked.getRelative(BlockFace.UP);
                         if (BukkitUtils.getCropBlocks().contains(trampledCrop.getType())) {

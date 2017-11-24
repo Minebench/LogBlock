@@ -635,7 +635,7 @@ public final class QueryParams implements Cloneable {
                     if (mat == null) {
                         throw new IllegalArgumentException("No material matching: '" + weaponName + "'");
                     }
-                    types.add(new Block(mat.getId(), -1));
+                    types.add(new Block(mat, -1));
                 }
                 needWeapon = true;
             } else if (param.equals("block") || param.equals("type")) {
@@ -665,7 +665,7 @@ public final class QueryParams implements Cloneable {
                         if (mat == null) {
                             throw new IllegalArgumentException("No material matching: '" + blockName + "'");
                         }
-                        types.add(new Block(mat.getId(), data));
+                        types.add(new Block(mat, data));
                     } else {
                         final Material mat = Material.matchMaterial(blockName);
                         types.add(new Block(typeFromName(blockName), -1));
@@ -792,16 +792,16 @@ public final class QueryParams implements Cloneable {
             }
         }
         if (types.size() > 0) {
-            for (final Set<Integer> equivalent : getBlockEquivalents()) {
+            for (final Set<Material> equivalent : getBlockEquivalents()) {
                 boolean found = false;
                 for (final Block block : types) {
-                    if (equivalent.contains(block.getBlock())) {
+                    if (equivalent.contains(block.getType())) {
                         found = true;
                         break;
                     }
                 }
                 if (found) {
-                    for (final Integer type : equivalent) {
+                    for (final Material type : equivalent) {
                         if (!Block.inList(types, type)) {
                             types.add(new Block(type, -1));
                         }

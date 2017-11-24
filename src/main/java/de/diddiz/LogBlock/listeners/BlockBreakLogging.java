@@ -9,6 +9,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -45,8 +46,9 @@ public class BlockBreakLogging extends LoggingListener {
                 // When in creative mode ice doesn't form water
                 if (event.getPlayer().getGameMode().equals(GameMode.CREATIVE)) {
                     consumer.queueBlockBreak(actor, origin.getState());
-                } else {
-                    consumer.queueBlockReplace(actor, origin.getState(), 9, (byte) 0);
+                } else if (event.getPlayer().getInventory().getItemInMainHand() == null
+                        || !event.getPlayer().getInventory().getItemInMainHand().getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
+                    consumer.queueBlockReplace(actor, origin.getState(), Material.WATER, (byte) 0);
                 }
             } else {
                 smartLogBlockBreak(consumer, actor, origin);

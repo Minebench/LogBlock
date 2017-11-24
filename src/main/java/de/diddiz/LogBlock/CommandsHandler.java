@@ -9,6 +9,7 @@ import de.diddiz.LogBlockQuestioner.LogBlockQuestioner;
 import de.diddiz.util.Block;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -458,7 +459,7 @@ public class CommandsHandler implements CommandExecutor {
                     params.needType = true;
                     params.needData = true;
                     params.needPlayer = true;
-                    if (params.types.isEmpty() || Block.inList(params.types, 63) || Block.inList(params.types, 68)) {
+                    if (params.types.isEmpty() || Block.inList(params.types, Material.SIGN_POST) || Block.inList(params.types, Material.WALL_SIGN)) {
                         params.needSignText = true;
                     }
                     if (params.bct == BlockChangeType.CHESTACCESS || params.bct == BlockChangeType.ALL) {
@@ -523,7 +524,7 @@ public class CommandsHandler implements CommandExecutor {
                     params.needType = true;
                     params.needData = true;
                     params.needPlayer = true;
-                    if (params.types.isEmpty() || Block.inList(params.types, 63) || Block.inList(params.types, 68)) {
+                    if (params.types.isEmpty() || Block.inList(params.types, Material.SIGN_POST) || Block.inList(params.types, Material.WALL_SIGN)) {
                         params.needSignText = true;
                     }
                     if (params.bct == BlockChangeType.CHESTACCESS || params.bct == BlockChangeType.ALL) {
@@ -671,7 +672,18 @@ public class CommandsHandler implements CommandExecutor {
                 final WorldEditor editor = new WorldEditor(logblock, params.world);
 
                 while (rs.next()) {
-                    editor.queueEdit(rs.getInt("x"), rs.getInt("y"), rs.getInt("z"), rs.getInt("replaced"), rs.getInt("type"), rs.getByte("data"), rs.getString("signtext"), rs.getShort("itemtype"), rs.getShort("itemamount"), rs.getShort("itemdata"));
+                    editor.queueEdit(
+                            rs.getInt("x"),
+                            rs.getInt("y"),
+                            rs.getInt("z"),
+                            Material.getMaterial(rs.getInt("replaced")),
+                            Material.getMaterial(rs.getInt("type")),
+                            rs.getByte("data"),
+                            rs.getString("signtext"),
+                            Material.getMaterial(rs.getShort("itemtype")),
+                            rs.getShort("itemamount"),
+                            rs.getShort("itemdata")
+                    );
                 }
                 final int changes = editor.getSize();
                 if (changes > 10000) {
@@ -741,7 +753,18 @@ public class CommandsHandler implements CommandExecutor {
                 }
                 final WorldEditor editor = new WorldEditor(logblock, params.world);
                 while (rs.next()) {
-                    editor.queueEdit(rs.getInt("x"), rs.getInt("y"), rs.getInt("z"), rs.getInt("type"), rs.getInt("replaced"), rs.getByte("data"), rs.getString("signtext"), rs.getShort("itemtype"), (short) -rs.getShort("itemamount"), rs.getShort("itemdata"));
+                    editor.queueEdit(
+                            rs.getInt("x"),
+                            rs.getInt("y"),
+                            rs.getInt("z"),
+                            Material.getMaterial(rs.getInt("type")),
+                            Material.getMaterial(rs.getInt("replaced")),
+                            rs.getByte("data"),
+                            rs.getString("signtext"),
+                            Material.getMaterial(rs.getShort("itemtype")),
+                            (short) -rs.getShort("itemamount"),
+                            rs.getShort("itemdata")
+                    );
                 }
                 final int changes = editor.getSize();
                 if (!params.silent) {

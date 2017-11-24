@@ -4,10 +4,11 @@ import static de.diddiz.LogBlock.Actor.actorFromString;
 import de.diddiz.LogBlock.config.Config;
 import de.diddiz.LogBlock.events.BlockChangePreLogEvent;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.Inventory;
@@ -54,7 +55,7 @@ public class Consumer extends TimerTask {
      * @param typeAfter Type of the block after the change
      * @param data Data of the block after the change
      */
-    public void queueBlock(Actor actor, Location loc, int typeBefore, int typeAfter, byte data) {
+    public void queueBlock(Actor actor, Location loc, Material typeBefore, Material typeAfter, byte data) {
         queueBlock(actor, loc, typeBefore, typeAfter, data, null, null);
     }
 
@@ -65,7 +66,7 @@ public class Consumer extends TimerTask {
      * @param before Blockstate of the block before actually being destroyed.
      */
     public void queueBlockBreak(Actor actor, BlockState before) {
-        queueBlockBreak(actor, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getTypeId(), before.getRawData());
+        queueBlockBreak(actor, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getType(), before.getRawData());
     }
 
     /**
@@ -76,8 +77,8 @@ public class Consumer extends TimerTask {
      * @param typeBefore Type of the block before the break
      * @param dataBefore Data of the block before the break
      */
-    public void queueBlockBreak(Actor actor, Location loc, int typeBefore, byte dataBefore) {
-        queueBlock(actor, loc, typeBefore, 0, dataBefore);
+    public void queueBlockBreak(Actor actor, Location loc, Material typeBefore, byte dataBefore) {
+        queueBlock(actor, loc, typeBefore, Material.AIR, dataBefore);
     }
 
     /**
@@ -87,7 +88,7 @@ public class Consumer extends TimerTask {
      * @param after Blockstate of the block after actually being placed.
      */
     public void queueBlockPlace(Actor actor, BlockState after) {
-        queueBlockPlace(actor, new Location(after.getWorld(), after.getX(), after.getY(), after.getZ()), after.getBlock().getTypeId(), after.getBlock().getData());
+        queueBlockPlace(actor, new Location(after.getWorld(), after.getX(), after.getY(), after.getZ()), after.getBlock().getType(), after.getBlock().getData());
     }
 
     /**
@@ -98,8 +99,8 @@ public class Consumer extends TimerTask {
      * @param type Type of the placed block
      * @param data Data of the placed block
      */
-    public void queueBlockPlace(Actor actor, Location loc, int type, byte data) {
-        queueBlock(actor, loc, 0, type, data);
+    public void queueBlockPlace(Actor actor, Location loc, Material type, byte data) {
+        queueBlock(actor, loc, Material.AIR, type, data);
     }
 
     /**
@@ -110,7 +111,7 @@ public class Consumer extends TimerTask {
      * @param after  Blockstate of the block after actually being placed.
      */
     public void queueBlockReplace(Actor actor, BlockState before, BlockState after) {
-        queueBlockReplace(actor, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getTypeId(), before.getRawData(), after.getTypeId(), after.getRawData());
+        queueBlockReplace(actor, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getType(), before.getRawData(), after.getType(), after.getRawData());
     }
 
     /**
@@ -121,8 +122,8 @@ public class Consumer extends TimerTask {
      * @param typeAfter Type of the block after being replaced
      * @param dataAfter Data of the block after being replaced
      */
-    public void queueBlockReplace(Actor actor, BlockState before, int typeAfter, byte dataAfter) {
-        queueBlockReplace(actor, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getTypeId(), before.getRawData(), typeAfter, dataAfter);
+    public void queueBlockReplace(Actor actor, BlockState before, Material typeAfter, byte dataAfter) {
+        queueBlockReplace(actor, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getType(), before.getRawData(), typeAfter, dataAfter);
     }
 
     /**
@@ -133,11 +134,11 @@ public class Consumer extends TimerTask {
      * @param dataBefore Data of the block before being replaced
      * @param after Blockstate of the block after actually being placed.
      */
-    public void queueBlockReplace(Actor actor, int typeBefore, byte dataBefore, BlockState after) {
-        queueBlockReplace(actor, new Location(after.getWorld(), after.getX(), after.getY(), after.getZ()), typeBefore, dataBefore, after.getTypeId(), after.getRawData());
+    public void queueBlockReplace(Actor actor, Material typeBefore, byte dataBefore, BlockState after) {
+        queueBlockReplace(actor, new Location(after.getWorld(), after.getX(), after.getY(), after.getZ()), typeBefore, dataBefore, after.getType(), after.getRawData());
     }
 
-    public void queueBlockReplace(Actor actor, Location loc, int typeBefore, byte dataBefore, int typeAfter, byte dataAfter) {
+    public void queueBlockReplace(Actor actor, Location loc, Material typeBefore, byte dataBefore, Material typeAfter, byte dataAfter) {
         if (dataBefore == 0 && (typeBefore != typeAfter)) {
             queueBlock(actor, loc, typeBefore, typeAfter, dataAfter);
         } else {
@@ -155,11 +156,11 @@ public class Consumer extends TimerTask {
      * @param itemAmount Amount of the item taken/stored
      * @param itemData Data of the item taken/stored
      */
-    public void queueChestAccess(Actor actor, BlockState container, short itemType, short itemAmount, short itemData) {
+    public void queueChestAccess(Actor actor, BlockState container, Material itemType, short itemAmount, short itemData) {
         if (!(container instanceof InventoryHolder)) {
             throw new IllegalArgumentException("Container must be instanceof InventoryHolder");
         }
-        queueChestAccess(actor, new Location(container.getWorld(), container.getX(), container.getY(), container.getZ()), container.getTypeId(), itemType, itemAmount, itemData);
+        queueChestAccess(actor, new Location(container.getWorld(), container.getX(), container.getY(), container.getZ()), container.getType(), itemType, itemAmount, itemData);
     }
 
     /**
@@ -172,7 +173,7 @@ public class Consumer extends TimerTask {
      * @param itemAmount Amount of the item taken/stored
      * @param itemData Data of the item taken/stored
      */
-    public void queueChestAccess(Actor actor, Location loc, int type, short itemType, short itemAmount, short itemData) {
+    public void queueChestAccess(Actor actor, Location loc, Material type, Material itemType, short itemAmount, short itemData) {
         queueBlock(actor, loc, type, type, (byte) 0, null, new ChestAccess(itemType, itemAmount, itemData));
     }
 
@@ -186,7 +187,7 @@ public class Consumer extends TimerTask {
         if (!(container instanceof InventoryHolder)) {
             return;
         }
-        queueContainerBreak(actor, new Location(container.getWorld(), container.getX(), container.getY(), container.getZ()), container.getTypeId(), container.getRawData(), ((InventoryHolder) container).getInventory());
+        queueContainerBreak(actor, new Location(container.getWorld(), container.getX(), container.getY(), container.getZ()), container.getType(), container.getRawData(), ((InventoryHolder) container).getInventory());
     }
 
     /**
@@ -198,10 +199,10 @@ public class Consumer extends TimerTask {
      * @param data The data of the container block
      * @param inv The inventory of the container block
      */
-    public void queueContainerBreak(Actor actor, Location loc, int type, byte data, Inventory inv) {
+    public void queueContainerBreak(Actor actor, Location loc, Material type, byte data, Inventory inv) {
         final ItemStack[] items = compressInventory(inv.getContents());
         for (final ItemStack item : items) {
-            queueChestAccess(actor, loc, type, (short) item.getTypeId(), (short) (item.getAmount() * -1), rawData(item));
+            queueChestAccess(actor, loc, type, item.getType(), (short) (item.getAmount() * -1), rawData(item));
         }
         queueBlockBreak(actor, loc, type, data);
     }
@@ -214,14 +215,14 @@ public class Consumer extends TimerTask {
         if (killer == null || victim == null) {
             return;
         }
-        int weapon = 0;
+        Material weapon = Material.AIR;
         Actor killerActor = Actor.actorFromEntity(killer);
         // If it's a projectile kill we want to manually assign the weapon, so check for player before converting a projectile to its source
-        if (killer instanceof Player && ((Player) killer).getItemInHand() != null) {
-            weapon = ((Player) killer).getItemInHand().getTypeId();
+        if (killer instanceof LivingEntity && ((LivingEntity) killer).getEquipment().getItemInMainHand() != null) {
+            weapon = ((LivingEntity) killer).getEquipment().getItemInMainHand().getType();
         }
         if (killer instanceof Projectile) {
-            weapon = itemIDfromProjectileEntity(killer);
+            weapon = itemTypeFromProjectileEntity(killer);
             ProjectileSource ps = ((Projectile) killer).getShooter();
             if (ps == null) {
                 killerActor = Actor.actorFromEntity(killer);
@@ -243,7 +244,7 @@ public class Consumer extends TimerTask {
         if (killer == null || victim == null) {
             return;
         }
-        queueKill(victim.getLocation(), killer, Actor.actorFromEntity(victim), 0);
+        queueKill(victim.getLocation(), killer, Actor.actorFromEntity(victim), Material.AIR);
     }
 
     /**
@@ -251,11 +252,11 @@ public class Consumer extends TimerTask {
      * @param killer Name of the killer. Can be null.
      * @param victim Name of the victim. Can't be null.
      * @param weapon     Item id of the weapon. 0 for no weapon.
-     * @deprecated Use {@link #queueKill(org.bukkit.Location, de.diddiz.LogBlock.Actor, de.diddiz.LogBlock.Actor, int)}
+     * @deprecated Use {@link #queueKill(org.bukkit.Location, de.diddiz.LogBlock.Actor, de.diddiz.LogBlock.Actor, Material)}
      * instead
      */
-    @Deprecated
-    public void queueKill(World world, Actor killer, Actor victim, int weapon) {
+    @Deprecated // TODO: Remove. Was deprecated and keeping backwards compatibility to IDs is not necessary
+    public void queueKill(World world, Actor killer, Actor victim, Material weapon) {
         queueKill(new Location(world, 0, 0, 0), killer, victim, weapon);
     }
 
@@ -265,11 +266,11 @@ public class Consumer extends TimerTask {
      * @param victim   Victim Actor. Can't be null.
      * @param weapon   Item id of the weapon. 0 for no weapon.
      */
-    public void queueKill(Location location, Actor killer, Actor victim, int weapon) {
+    public void queueKill(Location location, Actor killer, Actor victim, Material weapon) {
         if (victim == null || !isLogged(location.getWorld())) {
             return;
         }
-        queue.add(new KillRow(location, killer == null ? null : killer, victim, weapon));
+        queue.add(new KillRow(location, killer, victim, weapon));
     }
 
     /**
@@ -281,11 +282,11 @@ public class Consumer extends TimerTask {
      * @param data Data of the sign being broken
      * @param lines The four lines on the sign.
      */
-    public void queueSignBreak(Actor actor, Location loc, int type, byte data, String[] lines) {
-        if (type != 63 && type != 68 || lines == null || lines.length != 4) {
+    public void queueSignBreak(Actor actor, Location loc, Material type, byte data, String[] lines) {
+        if (type.getData() != org.bukkit.material.Sign.class || lines == null || lines.length != 4) {
             return;
         }
-        queueBlock(actor, loc, type, 0, data, lines[0] + "\0" + lines[1] + "\0" + lines[2] + "\0" + lines[3], null);
+        queueBlock(actor, loc, type, Material.AIR, data, lines[0] + "\0" + lines[1] + "\0" + lines[2] + "\0" + lines[3], null);
     }
 
     /**
@@ -294,8 +295,8 @@ public class Consumer extends TimerTask {
      * @param actor Actor responsible for breaking the sign
      * @param sign The sign being broken
      */
-    public void queueSignBreak(Actor actor, Sign sign) {
-        queueSignBreak(actor, new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()), sign.getTypeId(), sign.getRawData(), sign.getLines());
+    public void queueSignBreak(Actor actor, org.bukkit.block.Sign sign) {
+        queueSignBreak(actor, new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()), sign.getType(), sign.getRawData(), sign.getLines());
     }
 
     /**
@@ -307,11 +308,11 @@ public class Consumer extends TimerTask {
      * @param data Data of the placed sign block
      * @param lines The four lines on the sign.
      */
-    public void queueSignPlace(Actor actor, Location loc, int type, byte data, String[] lines) {
-        if (type != 63 && type != 68 || lines == null || lines.length != 4) {
+    public void queueSignPlace(Actor actor, Location loc, Material type, byte data, String[] lines) {
+        if (type.getData() != org.bukkit.material.Sign.class || lines == null || lines.length != 4) {
             return;
         }
-        queueBlock(actor, loc, 0, type, data, lines[0] + "\0" + lines[1] + "\0" + lines[2] + "\0" + lines[3], null);
+        queueBlock(actor, loc, Material.AIR, type, data, lines[0] + "\0" + lines[1] + "\0" + lines[2] + "\0" + lines[3], null);
     }
 
     /**
@@ -320,8 +321,8 @@ public class Consumer extends TimerTask {
      * @param actor Actor placing the sign
      * @param sign The palced sign object
      */
-    public void queueSignPlace(Actor actor, Sign sign) {
-        queueSignPlace(actor, new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()), sign.getTypeId(), sign.getRawData(), sign.getLines());
+    public void queueSignPlace(Actor actor, org.bukkit.block.Sign sign) {
+        queueSignPlace(actor, new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()), sign.getType(), sign.getRawData(), sign.getLines());
     }
 
     public void queueChat(Actor player, String message) {
@@ -345,16 +346,17 @@ public class Consumer extends TimerTask {
     }
 
     // Deprecated methods re-added for API compatability
+    // TODO: Remove this as it breaks anyways with Materials?
 
     /**
      * Logs any block change. Don't try to combine broken and placed blocks.
      * Queue two block changes or use the queueBLockReplace methods.
      *
      * @deprecated Use
-     * {@link #queueBlock(de.diddiz.LogBlock.Actor, org.bukkit.Location, int, int, byte)}
+     * {@link #queueBlock(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, Material, byte)}
      * which supports UUIDs
      */
-    public void queueBlock(String playerName, Location loc, int typeBefore, int typeAfter, byte data) {
+    public void queueBlock(String playerName, Location loc, Material typeBefore, Material typeAfter, byte data) {
         queueBlock(actorFromString(playerName), loc, typeBefore, typeAfter, data);
     }
 
@@ -374,10 +376,10 @@ public class Consumer extends TimerTask {
     /**
      * Logs a block break. The block type afterwards is assumed to be 0 (air).
      *
-     * @deprecated Use {@link #queueBlockBreak(de.diddiz.LogBlock.Actor, org.bukkit.Location, int, byte)}
+     * @deprecated Use {@link #queueBlockBreak(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte)}
      * which supports UUIDs
      */
-    public void queueBlockBreak(String playerName, Location loc, int typeBefore, byte dataBefore) {
+    public void queueBlockBreak(String playerName, Location loc, Material typeBefore, byte dataBefore) {
         queueBlockBreak(actorFromString(playerName), loc, typeBefore, dataBefore);
     }
 
@@ -394,10 +396,10 @@ public class Consumer extends TimerTask {
 
     /**
      * Logs a block place. The block type before is assumed to be 0 (air).
-     * @deprecated Use {@link #queueBlockPlace(de.diddiz.LogBlock.Actor, org.bukkit.Location, int, byte)}
+     * @deprecated Use {@link #queueBlockPlace(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte)}
      * which supports UUIDs
      */
-    public void queueBlockPlace(String playerName, Location loc, int type, byte data) {
+    public void queueBlockPlace(String playerName, Location loc, Material type, byte data) {
         queueBlockPlace(actorFromString(playerName), loc, type, data);
     }
 
@@ -413,46 +415,46 @@ public class Consumer extends TimerTask {
 
     /**
      * @param before Blockstate of the block before actually being destroyed.
-     * @deprecated Use {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState, int, byte)}
+     * @deprecated Use {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState, Material, byte)}
      * which supports UUIDs
      */
-    public void queueBlockReplace(String playerName, BlockState before, int typeAfter, byte dataAfter) {
+    public void queueBlockReplace(String playerName, BlockState before, Material typeAfter, byte dataAfter) {
         queueBlockReplace(actorFromString(playerName), before, typeAfter, dataAfter);
     }
 
     /**
      * @param after Blockstate of the block after actually being placed.
-     * @deprecated {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, int, byte, org.bukkit.block.BlockState)}
+     * @deprecated {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, Material, byte, org.bukkit.block.BlockState)}
      * which supports UUIDs
      */
-    public void queueBlockReplace(String playerName, int typeBefore, byte dataBefore, BlockState after) {
+    public void queueBlockReplace(String playerName, Material typeBefore, byte dataBefore, BlockState after) {
         queueBlockReplace(actorFromString(playerName), typeBefore, dataBefore, after);
     }
 
     /**
-    * @deprecated use {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, org.bukkit.Location, int, byte, int, byte)}
+    * @deprecated use {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte, Material, byte)}
     * which supports UUIDs
     */
-    public void queueBlockReplace(String playerName, Location loc, int typeBefore, byte dataBefore, int typeAfter, byte dataAfter) {
+    public void queueBlockReplace(String playerName, Location loc, Material typeBefore, byte dataBefore, Material typeAfter, byte dataAfter) {
         queueBlockReplace(actorFromString(playerName),loc,typeBefore,dataBefore,typeAfter,dataAfter);
     }
 
     /**
      * @param container The respective container. Must be an instance of an
      * InventoryHolder.
-     * @deprecated Use {@link #queueChestAccess(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState, short, short, short)}
+     * @deprecated Use {@link #queueChestAccess(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState, Material, short, short)}
      * which supports UUIDs
      */
-    public void queueChestAccess(String playerName, BlockState container, short itemType, short itemAmount, short itemData) {
+    public void queueChestAccess(String playerName, BlockState container, Material itemType, short itemAmount, short itemData) {
         queueChestAccess(actorFromString(playerName),container,itemType,itemAmount,itemData);
     }
 
     /**
      * @param type Type id of the container.
-     * @deprecated Use {@link #queueChestAccess(de.diddiz.LogBlock.Actor, org.bukkit.Location, int, short, short, short)}
+     * @deprecated Use {@link #queueChestAccess(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, Material, short, short)}
      * which supports UUIDs
      */
-    public void queueChestAccess(String playerName, Location loc, int type, short itemType, short itemAmount, short itemData) {
+    public void queueChestAccess(String playerName, Location loc, Material type, Material itemType, short itemAmount, short itemData) {
         queueChestAccess(actorFromString(playerName), loc, type, itemType, itemAmount, itemData);
     }
 
@@ -471,10 +473,10 @@ public class Consumer extends TimerTask {
     /**
      * Logs a container block break. The block type before is assumed to be o
      * (air). All content is assumed to be taken.
-     * @deprecated Use {@link #queueContainerBreak(de.diddiz.LogBlock.Actor, org.bukkit.Location, int, byte, org.bukkit.inventory.Inventory)}
+     * @deprecated Use {@link #queueContainerBreak(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte, org.bukkit.inventory.Inventory)}
      * which supports UUIDs
      */
-    public void queueContainerBreak(String playerName, Location loc, int type, byte data, Inventory inv) {
+    public void queueContainerBreak(String playerName, Location loc, Material type, byte data, Inventory inv) {
         queueContainerBreak(actorFromString(playerName),loc,type,data,inv);
     }
 
@@ -496,10 +498,10 @@ public class Consumer extends TimerTask {
      * @param killerName Name of the killer. Can be null.
      * @param victimName Name of the victim. Can't be null.
      * @param weapon Item id of the weapon. 0 for no weapon.
-     * @deprecated Use {@link #queueKill(org.bukkit.Location, de.diddiz.LogBlock.Actor, de.diddiz.LogBlock.Actor, int)} instead
+     * @deprecated Use {@link #queueKill(org.bukkit.Location, de.diddiz.LogBlock.Actor, de.diddiz.LogBlock.Actor, Material)} instead
      */
     @Deprecated
-    public void queueKill(World world, String killerName, String victimName, int weapon) {
+    public void queueKill(World world, String killerName, String victimName, Material weapon) {
         queueKill(world,actorFromString(killerName),actorFromString(victimName),weapon);
     }
 
@@ -508,20 +510,20 @@ public class Consumer extends TimerTask {
      * @param killerName Name of the killer. Can be null.
      * @param victimName Name of the victim. Can't be null.
      * @param weapon Item id of the weapon. 0 for no weapon.
-     * @deprecated Use {@link #queueKill(org.bukkit.Location, de.diddiz.LogBlock.Actor, de.diddiz.LogBlock.Actor, int)}
+     * @deprecated Use {@link #queueKill(org.bukkit.Location, de.diddiz.LogBlock.Actor, de.diddiz.LogBlock.Actor, Material)}
      * which supports UUIDs
      */
-    public void queueKill(Location location, String killerName, String victimName, int weapon) {
+    public void queueKill(Location location, String killerName, String victimName, Material weapon) {
         queueKill(location,actorFromString(killerName),actorFromString(victimName),weapon);
     }
 
     /**
      * @param type Type of the sign. Must be 63 or 68.
      * @param lines The four lines on the sign.
-     * @deprecated Use {@link #queueSignBreak(de.diddiz.LogBlock.Actor, org.bukkit.Location, int, byte, java.lang.String[])}
+     * @deprecated Use {@link #queueSignBreak(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte, java.lang.String[])}
      * which supports UUIDs
      */
-    public void queueSignBreak(String playerName, Location loc, int type, byte data, String[] lines) {
+    public void queueSignBreak(String playerName, Location loc, Material type, byte data, String[] lines) {
         queueSignBreak(actorFromString(playerName),loc,type,data,lines);
     }
 
@@ -529,17 +531,17 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueSignBreak(de.diddiz.LogBlock.Actor, org.bukkit.block.Sign)}
      * which supports UUIDs
      */
-    public void queueSignBreak(String playerName, Sign sign) {
+    public void queueSignBreak(String playerName, org.bukkit.block.Sign sign) {
         queueSignBreak(actorFromString(playerName),sign);
     }
 
     /**
      * @param type Type of the sign. Must be 63 or 68.
      * @param lines The four lines on the sign.
-     * @deprecated Use {@link #queueSignPlace(de.diddiz.LogBlock.Actor, org.bukkit.Location, int, byte, java.lang.String[])}
+     * @deprecated Use {@link #queueSignPlace(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte, java.lang.String[])}
      * which supports UUIDs
      */
-    public void queueSignPlace(String playerName, Location loc, int type, byte data, String[] lines) {
+    public void queueSignPlace(String playerName, Location loc, Material type, byte data, String[] lines) {
         queueSignPlace(actorFromString(playerName),loc,type,data,lines);
     }
 
@@ -547,7 +549,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueSignPlace(de.diddiz.LogBlock.Actor, org.bukkit.block.Sign)}
      * which supports UUIDs
      */
-    public void queueSignPlace(String playerName, Sign sign) {
+    public void queueSignPlace(String playerName, org.bukkit.block.Sign sign) {
         queueSignPlace(actorFromString(playerName),sign);
     }
 /**
@@ -738,7 +740,7 @@ public class Consumer extends TimerTask {
         return playerIds.containsKey(actor);
     }
 
-    private void queueBlock(Actor actor, Location loc, int typeBefore, int typeAfter, byte data, String signtext, ChestAccess ca) {
+    private void queueBlock(Actor actor, Location loc, Material typeBefore, Material typeAfter, byte data, String signtext, ChestAccess ca) {
 
         if (Config.fireCustomEvents) {
             // Create and call the event
@@ -758,7 +760,7 @@ public class Consumer extends TimerTask {
             ca = event.getChestAccess();
         }
         // Do this last so LogBlock still has final say in what is being added
-        if (actor == null || loc == null || typeBefore < 0 || typeAfter < 0 || (Config.safetyIdCheck && (typeBefore > 255 || typeAfter > 255)) || hiddenPlayers.contains(actor.getName().toLowerCase()) || !isLogged(loc.getWorld()) || typeBefore != typeAfter && hiddenBlocks.contains(typeBefore) && hiddenBlocks.contains(typeAfter)) {
+        if (actor == null || loc == null || typeBefore == null || typeAfter == null || hiddenPlayers.contains(actor.getName().toLowerCase()) || !isLogged(loc.getWorld()) || typeBefore != typeAfter && hiddenBlocks.contains(typeBefore) && hiddenBlocks.contains(typeAfter)) {
             return;
         }
         queue.add(new BlockRow(loc, actor, typeBefore, typeAfter, data, signtext, ca));
@@ -811,7 +813,7 @@ public class Consumer extends TimerTask {
     private class BlockRow extends BlockChange implements MergeableRow {
         private Connection connection;
 
-        public BlockRow(Location loc, Actor actor, int replaced, int type, byte data, String signtext, ChestAccess ca) {
+        public BlockRow(Location loc, Actor actor, Material replaced, Material type, byte data, String signtext, ChestAccess ca) {
             super(System.currentTimeMillis() / 1000, loc, actor, replaced, type, data, signtext, ca);
         }
 
@@ -852,8 +854,8 @@ public class Consumer extends TimerTask {
             try {
                 ps1 = connection.prepareStatement("INSERT INTO `" + table + "` (date, playerid, replaced, type, data, x, y, z) VALUES(FROM_UNIXTIME(?), " + playerID(actor) + ", ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 ps1.setLong(1, date);
-                ps1.setInt(2, replaced);
-                ps1.setInt(3, type);
+                ps1.setInt(2, replaced.getId());
+                ps1.setInt(3, type.getId());
                 ps1.setInt(4, data);
                 ps1.setInt(5, loc.getBlockX());
                 ps1.setInt(6, safeY(loc));
@@ -872,7 +874,7 @@ public class Consumer extends TimerTask {
                     ps.executeUpdate();
                 } else if (ca != null) {
                     ps = connection.prepareStatement("INSERT INTO `" + table + "-chest` (itemtype, itemamount, itemdata, id) values (?, ?, ?, ?)");
-                    ps.setInt(1, ca.itemType);
+                    ps.setInt(1, ca.itemType.getId());
                     ps.setInt(2, ca.itemAmount);
                     ps.setInt(3, ca.itemData);
                     ps.setInt(4, id);
@@ -958,8 +960,8 @@ public class Consumer extends TimerTask {
                 for (BlockRow row : rows) {
                     ps.setLong(1, row.date);
                     ps.setInt(2, playerIds.get(row.actor));
-                    ps.setInt(3, row.replaced);
-                    ps.setInt(4, row.type);
+                    ps.setInt(3, row.replaced.getId());
+                    ps.setInt(4, row.type.getId());
                     ps.setInt(5, row.data);
                     ps.setInt(6, row.loc.getBlockX());
                     ps.setInt(7, safeY(row.loc));
@@ -1028,10 +1030,10 @@ public class Consumer extends TimerTask {
     private class KillRow implements Row {
         final long date;
         final Actor killer, victim;
-        final int weapon;
+        final Material weapon;
         final Location loc;
 
-        KillRow(Location loc, Actor attacker, Actor defender, int weapon) {
+        KillRow(Location loc, Actor attacker, Actor defender, Material weapon) {
             date = System.currentTimeMillis() / 1000;
             this.loc = loc;
             killer = attacker;

@@ -1,9 +1,12 @@
 package de.diddiz.LogBlock;
 
-public class ChestAccess {
-    final short itemType, itemAmount, itemData;
+import org.bukkit.Material;
 
-    public ChestAccess(short itemType, short itemAmount, short itemData) {
+public class ChestAccess {
+    final Material itemType;
+    final short itemAmount, itemData;
+
+    public ChestAccess(Material itemType, short itemAmount, short itemData) {
         this.itemType = itemType;
         this.itemAmount = itemAmount;
         this.itemData = itemData >= 0 ? itemData : 0;

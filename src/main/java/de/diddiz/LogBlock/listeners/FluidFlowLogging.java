@@ -4,21 +4,17 @@ import de.diddiz.LogBlock.Actor;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.Logging;
 import de.diddiz.LogBlock.config.WorldConfig;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockFromToEvent;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import static de.diddiz.LogBlock.config.Config.getWorldConfig;
+import static de.diddiz.util.BukkitUtils.getNonFluidProofBlocks;
 
 public class FluidFlowLogging extends LoggingListener {
-    private static final Set<Integer> nonFluidProofBlocks = new HashSet<Integer>(Arrays.asList(27, 28, 31, 32, 37, 38, 39, 40, 50, 51, 55, 59, 66, 69, 70, 75, 76, 78, 93, 94, 104, 105, 106));
-
     public FluidFlowLogging(LogBlock lb) {
         super(lb);
     }
@@ -28,42 +24,42 @@ public class FluidFlowLogging extends LoggingListener {
         final WorldConfig wcfg = getWorldConfig(event.getBlock().getWorld());
         if (wcfg != null) {
             final Block to = event.getToBlock();
-            final int typeFrom = event.getBlock().getTypeId();
-            final int typeTo = to.getTypeId();
-            final boolean canFlow = typeTo == 0 || nonFluidProofBlocks.contains(typeTo);
-            if (typeFrom == 10 || typeFrom == 11) {
+            final Material typeFrom = event.getBlock().getType();
+            final Material typeTo = to.getType();
+            final boolean canFlow = typeTo == Material.AIR || getNonFluidProofBlocks().contains(typeTo);
+            if (typeFrom == Material.LAVA || typeFrom == Material.STATIONARY_LAVA) {
                 if (canFlow && wcfg.isLogging(Logging.LAVAFLOW)) {
                     if (isSurroundedByWater(to) && event.getBlock().getData() <= 2) {
-                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), 4, (byte) 0);
-                    } else if (typeTo == 0) {
-                        consumer.queueBlockPlace(new Actor("LavaFlow"), to.getLocation(), 10, (byte) (event.getBlock().getData() + 1));
+                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), Material.COBBLESTONE, (byte) 0);
+                    } else if (typeTo == Material.AIR) {
+                        consumer.queueBlockPlace(new Actor("LavaFlow"), to.getLocation(), Material.LAVA, (byte) (event.getBlock().getData() + 1));
                     } else {
-                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), 10, (byte) (event.getBlock().getData() + 1));
+                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), Material.LAVA, (byte) (event.getBlock().getData() + 1));
                     }
-                } else if (typeTo == 8 || typeTo == 9) {
+                } else if (typeTo == Material.WATER || typeTo == Material.STATIONARY_WATER) {
                     if (event.getFace() == BlockFace.DOWN) {
-                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), 1, (byte) 0);
+                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), Material.STONE, (byte) 0);
                     } else {
-                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), 4, (byte) 0);
+                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), Material.COBBLESTONE, (byte) 0);
                     }
                 }
-            } else if ((typeFrom == 8 || typeFrom == 9) && wcfg.isLogging(Logging.WATERFLOW)) {
-                if (typeTo == 0) {
-                    consumer.queueBlockPlace(new Actor("WaterFlow"), to.getLocation(), 8, (byte) (event.getBlock().getData() + 1));
-                } else if (nonFluidProofBlocks.contains(typeTo)) {
-                    consumer.queueBlockReplace(new Actor("WaterFlow"), to.getState(), 8, (byte) (event.getBlock().getData() + 1));
-                } else if (typeTo == 10 || typeTo == 11) {
+            } else if ((typeFrom == Material.WATER || typeFrom == Material.STATIONARY_WATER) && wcfg.isLogging(Logging.WATERFLOW)) {
+                if (typeTo == Material.AIR) {
+                    consumer.queueBlockPlace(new Actor("WaterFlow"), to.getLocation(), Material.WATER, (byte) (event.getBlock().getData() + 1));
+                } else if (getNonFluidProofBlocks().contains(typeTo)) {
+                    consumer.queueBlockReplace(new Actor("WaterFlow"), to.getState(), Material.WATER, (byte) (event.getBlock().getData() + 1));
+                } else if (typeTo == Material.LAVA || typeTo == Material.STATIONARY_LAVA) {
                     if (to.getData() == 0) {
-                        consumer.queueBlockReplace(new Actor("WaterFlow"), to.getState(), 49, (byte) 0);
+                        consumer.queueBlockReplace(new Actor("WaterFlow"), to.getState(), Material.OBSIDIAN, (byte) 0);
                     } else if (event.getFace() == BlockFace.DOWN) {
-                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), 1, (byte) 0);
+                        consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), Material.STONE, (byte) 0);
                     }
                 }
-                if (typeTo == 0 || nonFluidProofBlocks.contains(typeTo)) {
+                if (typeTo == Material.AIR || getNonFluidProofBlocks().contains(typeTo)) {
                     for (final BlockFace face : new BlockFace[]{BlockFace.DOWN, BlockFace.NORTH, BlockFace.WEST, BlockFace.EAST, BlockFace.SOUTH}) {
                         final Block lower = to.getRelative(face);
                         if (lower.getTypeId() == 10 || lower.getTypeId() == 11) {
-                            consumer.queueBlockReplace(new Actor("WaterFlow"), lower.getState(), lower.getData() == 0 ? 49 : 4, (byte) 0);
+                            consumer.queueBlockReplace(new Actor("WaterFlow"), lower.getState(), lower.getData() == 0 ? Material.OBSIDIAN : Material.COBBLESTONE, (byte) 0);
                         }
                     }
                 }

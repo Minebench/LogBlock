@@ -17,30 +17,81 @@ import java.util.*;
 
 import static de.diddiz.util.MaterialName.materialName;
 
+/**
+ * TODO: Integrate all this stuff into a material mapping enum so that we don't have to convert the DB with 1.13?
+  */
 public class BukkitUtils {
-    private static final Set<Set<Integer>> blockEquivalents;
+    private static final Set<Set<Material>> blockEquivalents;
     private static final Set<Material> relativeBreakable;
     private static final Set<Material> relativeTopBreakable;
     private static final Set<Material> relativeTopFallables;
     private static final Set<Material> fallingEntityKillers;
-
+    private static final Set<Material> nonFluidProofBlocks;
+    
     private static final Set<Material> cropBlocks;
     private static final Set<Material> containerBlocks;
 
-    private static final Map<EntityType, Integer> projectileItems;
-
+    private static final Map<EntityType, Material> projectileItems;
+    
     static {
-        blockEquivalents = new HashSet<Set<Integer>>(7);
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(2, 3, 60)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(8, 9, 79)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(10, 11)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(61, 62)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(73, 74)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(75, 76)));
-        blockEquivalents.add(new HashSet<Integer>(Arrays.asList(93, 94)));
+        blockEquivalents = new HashSet<>(10);
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.GRASS, Material.DIRT, Material.SOIL)));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.WATER, Material.STATIONARY_WATER, Material.ICE)));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.LAVA, Material.STATIONARY_LAVA)));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.FURNACE, Material.BURNING_FURNACE)));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.REDSTONE_ORE, Material.GLOWING_REDSTONE_ORE)));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON)));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON)));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.REDSTONE_COMPARATOR_OFF, Material.REDSTONE_COMPARATOR_ON)));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.COMMAND, Material.COMMAND_CHAIN, Material.COMMAND_REPEATING)));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(
+                Material.WHITE_SHULKER_BOX,
+                Material.ORANGE_SHULKER_BOX,
+                Material.MAGENTA_SHULKER_BOX,
+                Material.LIGHT_BLUE_SHULKER_BOX,
+                Material.YELLOW_SHULKER_BOX,
+                Material.LIME_SHULKER_BOX,
+                Material.PINK_SHULKER_BOX,
+                Material.GRAY_SHULKER_BOX,
+                Material.SILVER_SHULKER_BOX,
+                Material.CYAN_SHULKER_BOX,
+                Material.PURPLE_SHULKER_BOX,
+                Material.BLUE_SHULKER_BOX,
+                Material.BROWN_SHULKER_BOX,
+                Material.GREEN_SHULKER_BOX,
+                Material.RED_SHULKER_BOX,
+                Material.BLACK_SHULKER_BOX
+        )));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(
+                Material.WHITE_GLAZED_TERRACOTTA,
+                Material.ORANGE_GLAZED_TERRACOTTA,
+                Material.MAGENTA_GLAZED_TERRACOTTA,
+                Material.LIGHT_BLUE_GLAZED_TERRACOTTA,
+                Material.YELLOW_GLAZED_TERRACOTTA,
+                Material.LIME_GLAZED_TERRACOTTA,
+                Material.PINK_GLAZED_TERRACOTTA,
+                Material.GRAY_GLAZED_TERRACOTTA,
+                Material.SILVER_GLAZED_TERRACOTTA,
+                Material.CYAN_GLAZED_TERRACOTTA,
+                Material.PURPLE_GLAZED_TERRACOTTA,
+                Material.BLUE_GLAZED_TERRACOTTA,
+                Material.BROWN_GLAZED_TERRACOTTA,
+                Material.GREEN_GLAZED_TERRACOTTA,
+                Material.RED_GLAZED_TERRACOTTA,
+                Material.BLACK_GLAZED_TERRACOTTA
+        )));
+        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(
+                Material.WOODEN_DOOR,
+                Material.IRON_DOOR,
+                Material.ACACIA_DOOR,
+                Material.BIRCH_DOOR,
+                Material.DARK_OAK_DOOR,
+                Material.JUNGLE_DOOR,
+                Material.SPRUCE_DOOR
+        )));
 
         // Blocks that break when they are attached to a block
-        relativeBreakable = new HashSet<Material>(11);
+        relativeBreakable = EnumSet.noneOf(Material.class);
         relativeBreakable.add(Material.WALL_SIGN);
         relativeBreakable.add(Material.LADDER);
         relativeBreakable.add(Material.STONE_BUTTON);
@@ -54,7 +105,7 @@ public class BukkitUtils {
         relativeBreakable.add(Material.COCOA);
 
         // Blocks that break when they are on top of a block
-        relativeTopBreakable = new HashSet<Material>(33);
+        relativeTopBreakable = EnumSet.noneOf(Material.class);
         relativeTopBreakable.add(Material.SAPLING);
         relativeTopBreakable.add(Material.LONG_GRASS);
         relativeTopBreakable.add(Material.DEAD_BUSH);
@@ -65,6 +116,7 @@ public class BukkitUtils {
         relativeTopBreakable.add(Material.CROPS);
         relativeTopBreakable.add(Material.POTATO);
         relativeTopBreakable.add(Material.CARROT);
+        relativeTopBreakable.add(Material.BEETROOT_BLOCK);
         relativeTopBreakable.add(Material.WATER_LILY);
         relativeTopBreakable.add(Material.CACTUS);
         relativeTopBreakable.add(Material.SUGAR_CANE_BLOCK);
@@ -90,7 +142,7 @@ public class BukkitUtils {
         relativeTopBreakable.add(Material.DOUBLE_PLANT);
 
         // Blocks that fall
-        relativeTopFallables = new HashSet<Material>(4);
+        relativeTopFallables = EnumSet.noneOf(Material.class);
         relativeTopFallables.add(Material.SAND);
         relativeTopFallables.add(Material.GRAVEL);
         relativeTopFallables.add(Material.DRAGON_EGG);
@@ -98,7 +150,7 @@ public class BukkitUtils {
         relativeTopFallables.add(Material.CONCRETE_POWDER);
 
         // Blocks that break falling entities
-        fallingEntityKillers = new HashSet<Material>(32);
+        fallingEntityKillers = EnumSet.noneOf(Material.class);
         fallingEntityKillers.add(Material.SIGN_POST);
         fallingEntityKillers.add(Material.WALL_SIGN);
         fallingEntityKillers.add(Material.STONE_PLATE);
@@ -111,6 +163,8 @@ public class BukkitUtils {
         fallingEntityKillers.add(Material.CROPS);
         fallingEntityKillers.add(Material.CARROT);
         fallingEntityKillers.add(Material.POTATO);
+        fallingEntityKillers.add(Material.BEETROOT);
+        fallingEntityKillers.add(Material.NETHER_WARTS);
         fallingEntityKillers.add(Material.RED_MUSHROOM);
         fallingEntityKillers.add(Material.BROWN_MUSHROOM);
         fallingEntityKillers.add(Material.STEP);
@@ -122,6 +176,8 @@ public class BukkitUtils {
         fallingEntityKillers.add(Material.ACTIVATOR_RAIL);
         fallingEntityKillers.add(Material.RAILS);
         fallingEntityKillers.add(Material.LEVER);
+        fallingEntityKillers.add(Material.WOOD_BUTTON);
+        fallingEntityKillers.add(Material.STONE_BUTTON);
         fallingEntityKillers.add(Material.REDSTONE_WIRE);
         fallingEntityKillers.add(Material.REDSTONE_TORCH_ON);
         fallingEntityKillers.add(Material.REDSTONE_TORCH_OFF);
@@ -131,17 +187,62 @@ public class BukkitUtils {
         fallingEntityKillers.add(Material.REDSTONE_COMPARATOR_OFF);
         fallingEntityKillers.add(Material.DAYLIGHT_DETECTOR);
         fallingEntityKillers.add(Material.CARPET);
-
+        fallingEntityKillers.add(Material.DAYLIGHT_DETECTOR);
+        fallingEntityKillers.add(Material.DAYLIGHT_DETECTOR_INVERTED);
+        
+        // Blocks that liquid can flow through
+        nonFluidProofBlocks = EnumSet.noneOf(Material.class);
+        nonFluidProofBlocks.add(Material.POWERED_RAIL);
+        nonFluidProofBlocks.add(Material.DETECTOR_RAIL);
+        nonFluidProofBlocks.add(Material.LONG_GRASS);
+        nonFluidProofBlocks.add(Material.DEAD_BUSH);
+        nonFluidProofBlocks.add(Material.YELLOW_FLOWER);
+        nonFluidProofBlocks.add(Material.RED_ROSE);
+        nonFluidProofBlocks.add(Material.BROWN_MUSHROOM);
+        nonFluidProofBlocks.add(Material.RED_MUSHROOM);
+        nonFluidProofBlocks.add(Material.TORCH);
+        nonFluidProofBlocks.add(Material.FIRE);
+        nonFluidProofBlocks.add(Material.REDSTONE_WIRE);
+        nonFluidProofBlocks.add(Material.CROPS);
+        nonFluidProofBlocks.add(Material.RAILS);
+        nonFluidProofBlocks.add(Material.LEVER);
+        nonFluidProofBlocks.add(Material.REDSTONE_TORCH_OFF);
+        nonFluidProofBlocks.add(Material.REDSTONE_TORCH_ON);
+        nonFluidProofBlocks.add(Material.SNOW);
+        nonFluidProofBlocks.add(Material.SUGAR_CANE);
+        nonFluidProofBlocks.add(Material.CAKE_BLOCK);
+        nonFluidProofBlocks.add(Material.DIODE_BLOCK_OFF);
+        nonFluidProofBlocks.add(Material.DIODE_BLOCK_ON);
+        nonFluidProofBlocks.add(Material.PUMPKIN_STEM);
+        nonFluidProofBlocks.add(Material.MELON_STEM);
+        nonFluidProofBlocks.add(Material.VINE);
+        nonFluidProofBlocks.add(Material.WATER_LILY);
+        nonFluidProofBlocks.add(Material.NETHER_WARTS);
+        nonFluidProofBlocks.add(Material.TRIPWIRE_HOOK);
+        nonFluidProofBlocks.add(Material.TRIPWIRE);
+        nonFluidProofBlocks.add(Material.FLOWER_POT);
+        nonFluidProofBlocks.add(Material.CARROT);
+        nonFluidProofBlocks.add(Material.POTATO);
+        nonFluidProofBlocks.add(Material.WOOD_BUTTON);
+        nonFluidProofBlocks.add(Material.SKULL);
+        nonFluidProofBlocks.add(Material.REDSTONE_COMPARATOR_OFF);
+        nonFluidProofBlocks.add(Material.REDSTONE_COMPARATOR_ON);
+        nonFluidProofBlocks.add(Material.ACTIVATOR_RAIL);
+        nonFluidProofBlocks.add(Material.CARPET);
+        nonFluidProofBlocks.add(Material.DOUBLE_PLANT);
+        nonFluidProofBlocks.add(Material.BEETROOT_BLOCK);
+    
         // Crop Blocks
-        cropBlocks = new HashSet<Material>(5);
+        cropBlocks = EnumSet.noneOf(Material.class);
         cropBlocks.add(Material.CROPS);
         cropBlocks.add(Material.MELON_STEM);
         cropBlocks.add(Material.PUMPKIN_STEM);
         cropBlocks.add(Material.CARROT);
         cropBlocks.add(Material.POTATO);
+        cropBlocks.add(Material.BEETROOT_BLOCK);
 
         // Container Blocks
-        containerBlocks = new HashSet<Material>(6);
+        containerBlocks = EnumSet.noneOf(Material.class);
         containerBlocks.add(Material.CHEST);
         containerBlocks.add(Material.TRAPPED_CHEST);
         containerBlocks.add(Material.DISPENSER);
@@ -171,17 +272,18 @@ public class BukkitUtils {
         // containerBlocks.add(Material.ENDER_CHEST);
 
         // It doesn't seem like you could injure people with some of these, but they exist, so....
-        projectileItems = new EnumMap<EntityType, Integer>(EntityType.class);
-        projectileItems.put(EntityType.ARROW, 262);
-        projectileItems.put(EntityType.EGG, 344);
-        projectileItems.put(EntityType.ENDER_PEARL, 368);
-        projectileItems.put(EntityType.SMALL_FIREBALL, 385);    // Fire charge
-        projectileItems.put(EntityType.FIREBALL, 385);        // Fire charge
-        projectileItems.put(EntityType.FISHING_HOOK, 346);
-        projectileItems.put(EntityType.SNOWBALL, 332);
-        projectileItems.put(EntityType.SPLASH_POTION, 373);
-        projectileItems.put(EntityType.THROWN_EXP_BOTTLE, 384);
-        projectileItems.put(EntityType.WITHER_SKULL, 397);
+        projectileItems = new EnumMap<>(EntityType.class);
+        projectileItems.put(EntityType.ARROW, Material.ARROW);
+        projectileItems.put(EntityType.EGG, Material.EGG);
+        projectileItems.put(EntityType.ENDER_PEARL, Material.ENDER_PEARL);
+        projectileItems.put(EntityType.SMALL_FIREBALL, Material.FIREBALL);    // Fire charge
+        projectileItems.put(EntityType.FIREBALL, Material.FIREBALL);        // Fire charge
+        projectileItems.put(EntityType.FISHING_HOOK, Material.FISHING_ROD);
+        projectileItems.put(EntityType.SNOWBALL, Material.SNOW_BALL);
+        projectileItems.put(EntityType.SPLASH_POTION, Material.SPLASH_POTION);
+        projectileItems.put(EntityType.LINGERING_POTION, Material.LINGERING_POTION);
+        projectileItems.put(EntityType.THROWN_EXP_BOTTLE, Material.EXP_BOTTLE);
+        projectileItems.put(EntityType.WITHER_SKULL, Material.SKULL_ITEM);
 
     }
 
@@ -219,13 +321,13 @@ public class BukkitUtils {
         }
     }
 
-    public static int getInventoryHolderType(InventoryHolder holder) {
+    public static Material getInventoryHolderType(InventoryHolder holder) {
         if (holder instanceof DoubleChest) {
             return getInventoryHolderType(((DoubleChest) holder).getLeftSide());
         } else if (holder instanceof BlockState) {
-            return ((BlockState) holder).getTypeId();
+            return ((BlockState) holder).getType();
         } else {
-            return -1;
+            return null;
         }
     }
 
@@ -300,11 +402,16 @@ public class BukkitUtils {
         return compressed.toArray(new ItemStack[compressed.size()]);
     }
 
+    @Deprecated
     public static boolean equalTypes(int type1, int type2) {
+        return equalTypes(Material.getMaterial(type1), Material.getMaterial(type2));
+    }
+    
+    public static boolean equalTypes(Material type1, Material type2) {
         if (type1 == type2) {
             return true;
         }
-        for (final Set<Integer> equivalent : blockEquivalents) {
+        for (final Set<Material> equivalent : blockEquivalents) {
             if (equivalent.contains(type1) && equivalent.contains(type2)) {
                 return true;
             }
@@ -316,7 +423,7 @@ public class BukkitUtils {
         return new File(worldName).getName();
     }
 
-    public static Set<Set<Integer>> getBlockEquivalents() {
+    public static Set<Set<Material>> getBlockEquivalents() {
         return blockEquivalents;
     }
 
@@ -334,6 +441,10 @@ public class BukkitUtils {
 
     public static Set<Material> getFallingEntityKillers() {
         return fallingEntityKillers;
+    }
+    
+    public static Set<Material> getNonFluidProofBlocks() {
+        return nonFluidProofBlocks;
     }
 
     public static Set<Material> getCropBlocks() {
@@ -423,7 +534,7 @@ public class BukkitUtils {
         }
         return false;
     }
-
+    
     public static class ItemStackComparator implements Comparator<ItemStack> {
         @Override
         public int compare(ItemStack a, ItemStack b) {
@@ -445,8 +556,13 @@ public class BukkitUtils {
         }
     }
 
+    @Deprecated
     public static int itemIDfromProjectileEntity(Entity e) {
-        Integer i = projectileItems.get(e.getType());
-        return (i == null) ? 0 : i;
+        return itemTypeFromProjectileEntity(e).getId();
+    }
+    
+    public static Material itemTypeFromProjectileEntity(Entity e) {
+        Material type = projectileItems.get(e.getType());
+        return type != null ? type : Material.AIR;
     }
 }

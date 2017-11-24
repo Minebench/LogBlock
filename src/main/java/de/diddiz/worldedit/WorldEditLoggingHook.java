@@ -90,28 +90,28 @@ public class WorldEditLoggingHook {
 
                         Location location = new Location(world, pt.getBlockX(), pt.getBlockY(), pt.getBlockZ());
                         Block origin = location.getBlock();
-                        int typeBefore = origin.getTypeId();
+                        Material typeBefore = origin.getType();
                         byte dataBefore = origin.getData();
                         // If we're dealing with a sign, store the block state to read the text off
                         BlockState stateBefore = null;
-                        if (typeBefore == Material.SIGN_POST.getId() || typeBefore == Material.SIGN.getId()) {
+                        if (typeBefore.getData() == org.bukkit.material.Sign.class) {
                             stateBefore = origin.getState();
                         }
 
                         // Check to see if we've broken a sign
-                        if (Config.isLogging(location.getWorld().getName(), Logging.SIGNTEXT) && (typeBefore == Material.SIGN_POST.getId() || typeBefore == Material.SIGN.getId())) {
+                        if (Config.isLogging(location.getWorld().getName(), Logging.SIGNTEXT) && typeBefore.getData() == org.bukkit.material.Sign.class) {
                             plugin.getConsumer().queueSignBreak(lbActor, (Sign) stateBefore);
                             if (block.getType() != Material.AIR.getId()) {
-                                plugin.getConsumer().queueBlockPlace(lbActor, location, block.getType(), (byte) block.getData());
+                                plugin.getConsumer().queueBlockPlace(lbActor, location, Material.getMaterial(block.getType()), (byte) block.getData());
                             }
                         } else {
                             if (dataBefore != 0) {
                                 plugin.getConsumer().queueBlockBreak(lbActor, location, typeBefore, dataBefore);
                                 if (block.getType() != Material.AIR.getId()) {
-                                    plugin.getConsumer().queueBlockPlace(lbActor, location, block.getType(), (byte) block.getData());
+                                    plugin.getConsumer().queueBlockPlace(lbActor, location, Material.getMaterial(block.getType()), (byte) block.getData());
                                 }
                             } else {
-                                plugin.getConsumer().queueBlock(lbActor, location, typeBefore, block.getType(), (byte) block.getData());
+                                plugin.getConsumer().queueBlock(lbActor, location, typeBefore, Material.getMaterial(block.getType()), (byte) block.getData());
                             }
                         }
                     }

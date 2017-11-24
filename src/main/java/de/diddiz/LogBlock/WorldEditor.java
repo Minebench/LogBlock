@@ -7,11 +7,11 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Bed;
+import org.bukkit.material.Chest;
 import org.bukkit.material.PistonBaseMaterial;
 import org.bukkit.material.PistonExtensionMaterial;
 
@@ -70,7 +70,7 @@ public class WorldEditor implements Runnable {
         this.sender = sender;
     }
 
-    public void queueEdit(int x, int y, int z, int replaced, int type, byte data, String signtext, short itemType, short itemAmount, short itemData) {
+    public void queueEdit(int x, int y, int z, Material replaced, Material type, byte data, String signtext, Material itemType, short itemAmount, short itemData) {
         edits.add(new Edit(0, new Location(world, x, y, z), null, replaced, type, data, signtext, new ChestAccess(itemType, itemAmount, itemData)));
     }
 
@@ -145,7 +145,7 @@ public class WorldEditor implements Runnable {
     }
 
     private class Edit extends BlockChange {
-        public Edit(long time, Location loc, Actor actor, int replaced, int type, byte data, String signtext, ChestAccess ca) {
+        public Edit(long time, Location loc, Actor actor, Material replaced, Material type, byte data, String signtext, ChestAccess ca) {
             super(time, loc, actor, replaced, type, data, signtext, ca);
         }
 
@@ -154,7 +154,7 @@ public class WorldEditor implements Runnable {
                 return PerformResult.BLACKLISTED;
             }
             final Block block = loc.getBlock();
-            if (replaced == 0 && block.getTypeId() == 0) {
+            if (replaced == Material.AIR && block.getType() == Material.AIR) {
                 return PerformResult.NO_ACTION;
             }
             final BlockState state = block.getState();
@@ -162,19 +162,15 @@ public class WorldEditor implements Runnable {
                 world.loadChunk(block.getChunk());
             }
             if (type == replaced) {
-                if (type == 0) {
-                    if (!block.setTypeId(0)) {
-                        throw new WorldEditorException(block.getTypeId(), 0, block.getLocation());
-                    }
-                } else if (ca != null) {
-                    if (getContainerBlocks().contains(Material.getMaterial(type))) {
+                if (ca != null) {
+                    if (getContainerBlocks().contains(type)) {
                         int leftover;
                         try {
                             leftover = modifyContainer(state, new ItemStack(ca.itemType, -ca.itemAmount, ca.itemData));
                             // Special-case blocks which might be double chests
-                            if (leftover > 0 && (type == 54 || type == 146)) {
+                            if (leftover > 0 && (type.getData() == Chest.class)) {
                                 for (final BlockFace face : new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST}) {
-                                    if (block.getRelative(face).getTypeId() == type) {
+                                    if (block.getRelative(face).getType() == type) {
                                         leftover = modifyContainer(block.getRelative(face).getState(), new ItemStack(ca.itemType, ca.itemAmount < 0 ? leftover : -leftover, ca.itemData));
                                     }
                                 }
@@ -194,25 +190,23 @@ public class WorldEditor implements Runnable {
                 }
                 return PerformResult.SUCCESS;
             }
-            if (!(equalTypes(block.getTypeId(), type) || replaceAnyway.contains(block.getTypeId()))) {
+            if (!(equalTypes(block.getType(), type) || replaceAnyway.contains(block.getTypeId()))) {
                 return PerformResult.NO_ACTION;
             }
             if (state instanceof InventoryHolder) {
                 ((InventoryHolder) state).getInventory().clear();
                 state.update();
             }
-            if (block.getTypeId() == replaced) {
-                if (block.getData() != (type == 0 ? data : (byte) 0)) {
-                    block.setData(type == 0 ? data : (byte) 0, true);
+            if (block.getType() == replaced) {
+                if (block.getData() != (type == Material.AIR ? data : (byte) 0)) {
+                    block.setData(type == Material.AIR ? data : (byte) 0, true);
                 } else {
                     return PerformResult.NO_ACTION;
                 }
-            } else if (!block.setTypeIdAndData(replaced, type == 0 ? data : (byte) 0, true)) {
-                throw new WorldEditorException(block.getTypeId(), replaced, block.getLocation());
             }
             final int curtype = block.getTypeId();
             if (signtext != null && (curtype == 63 || curtype == 68)) {
-                final Sign sign = (Sign) block.getState();
+                final org.bukkit.block.Sign sign = (org.bukkit.block.Sign) block.getState();
                 final String[] lines = signtext.split("\0", 4);
                 if (lines.length < 4) {
                     return PerformResult.NO_ACTION;
