@@ -21,7 +21,7 @@ import static de.diddiz.util.MaterialName.materialName;
  * TODO: Integrate all this stuff into a material mapping enum so that we don't have to convert the DB with 1.13?
   */
 public class BukkitUtils {
-    private static final Set<Set<Material>> blockEquivalents;
+    private static final Map<Material, Set<Material>> blockEquivalents;
     private static final Set<Material> relativeBreakable;
     private static final Set<Material> relativeTopBreakable;
     private static final Set<Material> relativeTopFallables;
@@ -34,17 +34,21 @@ public class BukkitUtils {
     private static final Map<EntityType, Material> projectileItems;
     
     static {
-        blockEquivalents = new HashSet<>(10);
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.GRASS, Material.DIRT, Material.SOIL)));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.WATER, Material.STATIONARY_WATER, Material.ICE)));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.LAVA, Material.STATIONARY_LAVA)));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.FURNACE, Material.BURNING_FURNACE)));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.REDSTONE_ORE, Material.GLOWING_REDSTONE_ORE)));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON)));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON)));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.REDSTONE_COMPARATOR_OFF, Material.REDSTONE_COMPARATOR_ON)));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(Material.COMMAND, Material.COMMAND_CHAIN, Material.COMMAND_REPEATING)));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(
+        blockEquivalents = new EnumMap<>(Material.class);
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.GRASS, Material.DIRT, Material.SOIL)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.WATER, Material.STATIONARY_WATER, Material.ICE)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.LAVA, Material.STATIONARY_LAVA)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.FURNACE, Material.BURNING_FURNACE)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.REDSTONE_ORE, Material.GLOWING_REDSTONE_ORE)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.REDSTONE_TORCH_OFF, Material.REDSTONE_TORCH_ON)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.REDSTONE_COMPARATOR_OFF, Material.REDSTONE_COMPARATOR_ON)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.COMMAND, Material.COMMAND_CHAIN, Material.COMMAND_REPEATING)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.TRAP_DOOR, Material.IRON_TRAPDOOR)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.STONE_PLATE, Material.WOOD_PLATE, Material.IRON_PLATE, Material.GOLD_PLATE)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.CHEST, Material.TRAPPED_CHEST)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(Material.SIGN_POST, Material.WALL_SIGN)));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(
                 Material.WHITE_SHULKER_BOX,
                 Material.ORANGE_SHULKER_BOX,
                 Material.MAGENTA_SHULKER_BOX,
@@ -62,7 +66,7 @@ public class BukkitUtils {
                 Material.RED_SHULKER_BOX,
                 Material.BLACK_SHULKER_BOX
         )));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(
+        addEquivalents(EnumSet.copyOf(Arrays.asList(
                 Material.WHITE_GLAZED_TERRACOTTA,
                 Material.ORANGE_GLAZED_TERRACOTTA,
                 Material.MAGENTA_GLAZED_TERRACOTTA,
@@ -80,7 +84,7 @@ public class BukkitUtils {
                 Material.RED_GLAZED_TERRACOTTA,
                 Material.BLACK_GLAZED_TERRACOTTA
         )));
-        blockEquivalents.add(EnumSet.copyOf(Arrays.asList(
+        addEquivalents(EnumSet.copyOf(Arrays.asList(
                 Material.WOODEN_DOOR,
                 Material.IRON_DOOR,
                 Material.ACACIA_DOOR,
@@ -88,6 +92,14 @@ public class BukkitUtils {
                 Material.DARK_OAK_DOOR,
                 Material.JUNGLE_DOOR,
                 Material.SPRUCE_DOOR
+        )));
+        addEquivalents(EnumSet.copyOf(Arrays.asList(
+                Material.FENCE_GATE,
+                Material.ACACIA_FENCE_GATE,
+                Material.BIRCH_FENCE_GATE,
+                Material.DARK_OAK_FENCE_GATE,
+                Material.JUNGLE_FENCE_GATE,
+                Material.SPRUCE_FENCE_GATE
         )));
 
         // Blocks that break when they are attached to a block
@@ -286,7 +298,13 @@ public class BukkitUtils {
         projectileItems.put(EntityType.WITHER_SKULL, Material.SKULL_ITEM);
 
     }
-
+    
+    private static void addEquivalents(EnumSet<Material> materials) {
+        for (Material material : materials) {
+            blockEquivalents.put(material, materials);
+        }
+    }
+    
     private static final BlockFace[] relativeBlockFaces = new BlockFace[]{
             BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN
     };
@@ -383,11 +401,11 @@ public class BukkitUtils {
         final ArrayList<ItemStack> compressed = new ArrayList<ItemStack>();
         for (final ItemStack item : items) {
             if (item != null) {
-                final int type = item.getTypeId();
+                final Material type = item.getType();
                 final short data = rawData(item);
                 boolean found = false;
                 for (final ItemStack item2 : compressed) {
-                    if (type == item2.getTypeId() && data == rawData(item2)) {
+                    if (type == item2.getType() && data == rawData(item2)) {
                         item2.setAmount(item2.getAmount() + item.getAmount());
                         found = true;
                         break;
@@ -411,10 +429,8 @@ public class BukkitUtils {
         if (type1 == type2) {
             return true;
         }
-        for (final Set<Material> equivalent : blockEquivalents) {
-            if (equivalent.contains(type1) && equivalent.contains(type2)) {
-                return true;
-            }
+        if (blockEquivalents.containsKey(type1)) {
+            return blockEquivalents.get(type1).contains(type2);
         }
         return false;
     }
@@ -423,8 +439,12 @@ public class BukkitUtils {
         return new File(worldName).getName();
     }
 
-    public static Set<Set<Material>> getBlockEquivalents() {
+    public static Map<Material, Set<Material>> getBlockEquivalents() {
         return blockEquivalents;
+    }
+    
+    public static Set<Material> getBlockEquivalents(Material type) {
+        return blockEquivalents.get(type);
     }
 
     public static Set<Material> getRelativeBreakables() {
@@ -538,11 +558,12 @@ public class BukkitUtils {
     public static class ItemStackComparator implements Comparator<ItemStack> {
         @Override
         public int compare(ItemStack a, ItemStack b) {
-            final int aType = a.getTypeId(), bType = b.getTypeId();
-            if (aType < bType) {
+            final Material aType = a.getType(), bType = b.getType();
+            int compared = aType.compareTo(bType);
+            if (compared < 0) {
                 return -1;
             }
-            if (aType > bType) {
+            if (compared > 0) {
                 return 1;
             }
             final short aData = rawData(a), bData = rawData(b);

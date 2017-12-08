@@ -1,6 +1,7 @@
 package de.diddiz.LogBlock;
 
 import de.diddiz.util.Block;
+import de.diddiz.util.BukkitUtils;
 import de.diddiz.util.Utils;
 import de.diddiz.worldedit.RegionContainer;
 import org.bukkit.Location;
@@ -792,19 +793,17 @@ public final class QueryParams implements Cloneable {
             }
         }
         if (types.size() > 0) {
-            for (final Set<Material> equivalent : getBlockEquivalents()) {
-                boolean found = false;
-                for (final Block block : types) {
-                    if (equivalent.contains(block.getType())) {
-                        found = true;
-                        break;
-                    }
+            Set<Material> equivalent = null;
+            for (final Block block : types) {
+                equivalent = BukkitUtils.getBlockEquivalents(block.getType());
+                if (equivalent != null && equivalent.contains(block.getType())) {
+                    break;
                 }
-                if (found) {
-                    for (final Material type : equivalent) {
-                        if (!Block.inList(types, type)) {
-                            types.add(new Block(type, -1));
-                        }
+            }
+            if (equivalent != null) {
+                for (final Material type : equivalent) {
+                    if (!Block.inList(types, type)) {
+                        types.add(new Block(type, -1));
                     }
                 }
             }

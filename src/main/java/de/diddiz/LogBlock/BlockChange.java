@@ -86,7 +86,7 @@ public class BlockChange implements LookupCacheElement {
                 }
             } else if (BukkitUtils.getContainerBlocks().contains(type)) {
                 msg.append("opened ").append(materialName(type));
-            } else if (type.getData() == Door.class)
+            } else if (BukkitUtils.equalTypes(Material.WOODEN_DOOR, type))
             // This is a problem that will have to be addressed in LB 2,
             // there is no way to tell from the top half of the block if
             // the door is opened or closed.
@@ -94,24 +94,23 @@ public class BlockChange implements LookupCacheElement {
                 msg.append("moved ").append(materialName(type));
             }
             // Trapdoor
-            else if (type.getData() == TrapDoor.class) {
+            else if (BukkitUtils.equalTypes(Material.TRAP_DOOR, type)) {
                 msg.append((data < 8 || data > 11) ? "opened" : "closed").append(" ").append(materialName(type));
             }
             // Fence gate
-            else if (type.getData() == Gate.class) {
+            else if (BukkitUtils.equalTypes(Material.FENCE_GATE, type)) {
                 msg.append(data > 3 ? "opened" : "closed").append(" ").append(materialName(type));
-            } else if (type.getData() == Lever.class) {
+            } else if (BukkitUtils.equalTypes(Material.LEVER, type)) {
                 msg.append("switched ").append(materialName(type));
-            } else if (type.getData() == Button.class) {
+            } else if (BukkitUtils.equalTypes(Material.STONE_BUTTON, type)) {
                 msg.append("pressed ").append(materialName(type));
-            } else if (type.getData() == Cake.class) {
+            } else if (BukkitUtils.equalTypes(Material.CAKE_BLOCK, type)) {
                 msg.append("ate a piece of ").append(materialName(type));
-            } else if (type == Material.NOTE_BLOCK || type.getData() == Diode.class || type.getData() == Comparator.class) {
+            } else if (type == Material.NOTE_BLOCK || BukkitUtils.equalTypes(Material.DIODE_BLOCK_ON, type) || BukkitUtils.equalTypes(Material.REDSTONE_COMPARATOR_ON, type)) {
                 msg.append("changed ").append(materialName(type));
-            } else if (type.getData() == PressurePlate.class || type == Material.GOLD_PLATE || type == Material.IRON_PLATE) {
-                // TODO: MaterialData does not extend PressurePlate for gold/iron plates. Fix that. (or see how 1.13 changes things)
+            } else if (BukkitUtils.equalTypes(Material.STONE_PLATE, type)) {
                 msg.append("stepped on ").append(materialName(type));
-            } else if (type.getData() == Tripwire.class) {
+            } else if (type == Material.TRIPWIRE) {
                 msg.append("ran into ").append(materialName(type));
             }
         } else if (type == Material.AIR) {

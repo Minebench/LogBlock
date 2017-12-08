@@ -1,5 +1,6 @@
 package de.diddiz.LogBlock;
 
+import de.diddiz.util.BukkitUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -168,7 +169,7 @@ public class WorldEditor implements Runnable {
                         try {
                             leftover = modifyContainer(state, new ItemStack(ca.itemType, -ca.itemAmount, ca.itemData));
                             // Special-case blocks which might be double chests
-                            if (leftover > 0 && (type.getData() == Chest.class)) {
+                            if (leftover > 0 && (BukkitUtils.equalTypes(Material.CHEST, type))) {
                                 for (final BlockFace face : new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST}) {
                                     if (block.getRelative(face).getType() == type) {
                                         leftover = modifyContainer(block.getRelative(face).getState(), new ItemStack(ca.itemType, ca.itemAmount < 0 ? leftover : -leftover, ca.itemData));
