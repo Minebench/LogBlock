@@ -45,6 +45,17 @@ public class Consumer extends TimerTask {
         } catch (final ClassNotFoundException ex) {
         }
     }
+    
+    /**
+     * Logs any block change. Don't try to combine broken and placed blocks. Queue two block changes or use the queueBLockReplace methods.
+     *
+     * @param actor Actor responsible for making the change
+     * @param before State of the block before the change
+     * @param after State of the block after the change
+     */
+    public void queueBlock(Actor actor, BlockState before, BlockState after) {
+        queueBlock(actor, before, after, null);
+    }
 
     /**
      * Logs any block change. Don't try to combine broken and placed blocks. Queue two block changes or use the queueBLockReplace methods.
@@ -54,7 +65,9 @@ public class Consumer extends TimerTask {
      * @param typeBefore Type of the block before the change
      * @param typeAfter Type of the block after the change
      * @param data Data of the block after the change
+     * @deprecated Use {@link #queueBlock(Actor, BlockState, BlockState)}
      */
+    @Deprecated
     public void queueBlock(Actor actor, Location loc, Material typeBefore, Material typeAfter, byte data) {
         queueBlock(actor, loc, typeBefore, typeAfter, data, null, null);
     }
@@ -76,7 +89,9 @@ public class Consumer extends TimerTask {
      * @param loc Location of the broken block
      * @param typeBefore Type of the block before the break
      * @param dataBefore Data of the block before the break
+     * @deprecated Use {@link #queueBlockBreak(Actor, BlockState)}
      */
+    @Deprecated
     public void queueBlockBreak(Actor actor, Location loc, Material typeBefore, byte dataBefore) {
         queueBlock(actor, loc, typeBefore, Material.AIR, dataBefore);
     }
@@ -98,7 +113,9 @@ public class Consumer extends TimerTask {
      * @param loc Location of the placed block
      * @param type Type of the placed block
      * @param data Data of the placed block
+     * @deprecated Use {@link #queueBlockPlace(Actor, BlockState)}
      */
+    @Deprecated
     public void queueBlockPlace(Actor actor, Location loc, Material type, byte data) {
         queueBlock(actor, loc, Material.AIR, type, data);
     }
@@ -121,7 +138,9 @@ public class Consumer extends TimerTask {
      * @param before Blockstate of the block before being replaced.
      * @param typeAfter Type of the block after being replaced
      * @param dataAfter Data of the block after being replaced
+     * @deprecated Use {@link #queueBlockReplace(Actor, BlockState, BlockState)}
      */
+    @Deprecated
     public void queueBlockReplace(Actor actor, BlockState before, Material typeAfter, byte dataAfter) {
         queueBlockReplace(actor, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getType(), before.getRawData(), typeAfter, dataAfter);
     }
@@ -133,11 +152,25 @@ public class Consumer extends TimerTask {
      * @param typeBefore Type of the block before being replaced
      * @param dataBefore Data of the block before being replaced
      * @param after Blockstate of the block after actually being placed.
+     * @deprecated Use {@link #queueBlockReplace(Actor, BlockState, BlockState)}
      */
+    @Deprecated
     public void queueBlockReplace(Actor actor, Material typeBefore, byte dataBefore, BlockState after) {
         queueBlockReplace(actor, new Location(after.getWorld(), after.getX(), after.getY(), after.getZ()), typeBefore, dataBefore, after.getType(), after.getRawData());
     }
-
+    
+    /**
+     * Logs a block being replaced from the type and data before and type and data after
+     *
+     * @param actor Actor responsible for replacing the block
+     * @param loc Location of the placed block
+     * @param typeBefore Type of the block before being replaced
+     * @param dataBefore Data of the block before being replaced
+     * @param typeAfter Type of the block after being replaced
+     * @param dataAfter Data of the block after being replaced
+     * @deprecated Use {@link #queueBlockReplace(Actor, BlockState, BlockState)}
+     */
+    @Deprecated
     public void queueBlockReplace(Actor actor, Location loc, Material typeBefore, byte dataBefore, Material typeAfter, byte dataAfter) {
         if (dataBefore == 0 && (typeBefore != typeAfter)) {
             queueBlock(actor, loc, typeBefore, typeAfter, dataAfter);
@@ -356,6 +389,7 @@ public class Consumer extends TimerTask {
      * {@link #queueBlock(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, Material, byte)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueBlock(String playerName, Location loc, Material typeBefore, Material typeAfter, byte data) {
         queueBlock(actorFromString(playerName), loc, typeBefore, typeAfter, data);
     }
@@ -368,6 +402,7 @@ public class Consumer extends TimerTask {
      * {@link #queueBlockBreak(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueBlockBreak(String playerName, BlockState before) {
         queueBlockBreak(actorFromString(playerName), before);
         
@@ -379,6 +414,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueBlockBreak(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueBlockBreak(String playerName, Location loc, Material typeBefore, byte dataBefore) {
         queueBlockBreak(actorFromString(playerName), loc, typeBefore, dataBefore);
     }
@@ -390,6 +426,7 @@ public class Consumer extends TimerTask {
      * @depracated Use {@link #queueBlockPlace(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueBlockPlace(String playerName, BlockState after) {
         queueBlockPlace(actorFromString(playerName), after);
     }
@@ -399,6 +436,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueBlockPlace(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueBlockPlace(String playerName, Location loc, Material type, byte data) {
         queueBlockPlace(actorFromString(playerName), loc, type, data);
     }
@@ -409,6 +447,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState, org.bukkit.block.BlockState)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueBlockReplace(String playerName, BlockState before, BlockState after) {
         queueBlockReplace(actorFromString(playerName), before, after);
     }
@@ -418,6 +457,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState, Material, byte)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueBlockReplace(String playerName, BlockState before, Material typeAfter, byte dataAfter) {
         queueBlockReplace(actorFromString(playerName), before, typeAfter, dataAfter);
     }
@@ -427,6 +467,7 @@ public class Consumer extends TimerTask {
      * @deprecated {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, Material, byte, org.bukkit.block.BlockState)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueBlockReplace(String playerName, Material typeBefore, byte dataBefore, BlockState after) {
         queueBlockReplace(actorFromString(playerName), typeBefore, dataBefore, after);
     }
@@ -435,6 +476,7 @@ public class Consumer extends TimerTask {
     * @deprecated use {@link #queueBlockReplace(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte, Material, byte)}
     * which supports UUIDs
     */
+    @Deprecated
     public void queueBlockReplace(String playerName, Location loc, Material typeBefore, byte dataBefore, Material typeAfter, byte dataAfter) {
         queueBlockReplace(actorFromString(playerName),loc,typeBefore,dataBefore,typeAfter,dataAfter);
     }
@@ -445,6 +487,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueChestAccess(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState, Material, short, short)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueChestAccess(String playerName, BlockState container, Material itemType, short itemAmount, short itemData) {
         queueChestAccess(actorFromString(playerName),container,itemType,itemAmount,itemData);
     }
@@ -454,6 +497,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueChestAccess(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, Material, short, short)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueChestAccess(String playerName, Location loc, Material type, Material itemType, short itemAmount, short itemData) {
         queueChestAccess(actorFromString(playerName), loc, type, itemType, itemAmount, itemData);
     }
@@ -466,6 +510,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueContainerBreak(de.diddiz.LogBlock.Actor, org.bukkit.block.BlockState)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueContainerBreak(String playerName, BlockState container) {
         queueContainerBreak(actorFromString(playerName), container);
     }
@@ -476,6 +521,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueContainerBreak(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte, org.bukkit.inventory.Inventory)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueContainerBreak(String playerName, Location loc, Material type, byte data, Inventory inv) {
         queueContainerBreak(actorFromString(playerName),loc,type,data,inv);
     }
@@ -489,6 +535,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueKill(de.diddiz.LogBlock.Actor, org.bukkit.entity.Entity)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueKill(String killer, Entity victim) {
         queueKill(actorFromString(killer),victim);
     }
@@ -513,6 +560,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueKill(org.bukkit.Location, de.diddiz.LogBlock.Actor, de.diddiz.LogBlock.Actor, Material)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueKill(Location location, String killerName, String victimName, Material weapon) {
         queueKill(location,actorFromString(killerName),actorFromString(victimName),weapon);
     }
@@ -523,6 +571,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueSignBreak(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte, java.lang.String[])}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueSignBreak(String playerName, Location loc, Material type, byte data, String[] lines) {
         queueSignBreak(actorFromString(playerName),loc,type,data,lines);
     }
@@ -531,6 +580,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueSignBreak(de.diddiz.LogBlock.Actor, org.bukkit.block.Sign)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueSignBreak(String playerName, org.bukkit.block.Sign sign) {
         queueSignBreak(actorFromString(playerName),sign);
     }
@@ -541,6 +591,7 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueSignPlace(de.diddiz.LogBlock.Actor, org.bukkit.Location, Material, byte, java.lang.String[])}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueSignPlace(String playerName, Location loc, Material type, byte data, String[] lines) {
         queueSignPlace(actorFromString(playerName),loc,type,data,lines);
     }
@@ -549,13 +600,16 @@ public class Consumer extends TimerTask {
      * @deprecated Use {@link #queueSignPlace(de.diddiz.LogBlock.Actor, org.bukkit.block.Sign)}
      * which supports UUIDs
      */
+    @Deprecated
     public void queueSignPlace(String playerName, org.bukkit.block.Sign sign) {
         queueSignPlace(actorFromString(playerName),sign);
     }
-/**
- * @deprecated Use {@link #queueChat(de.diddiz.LogBlock.Actor, java.lang.String)}
- * which supports UUIDs
- */
+    
+    /**
+     * @deprecated Use {@link #queueChat(de.diddiz.LogBlock.Actor, java.lang.String)}
+     * which supports UUIDs
+     */
+    @Deprecated
     public void queueChat(String player, String message) {
         queueChat(actorFromString(player),message);
     }
@@ -740,11 +794,16 @@ public class Consumer extends TimerTask {
         return playerIds.containsKey(actor);
     }
 
+    @Deprecated
     private void queueBlock(Actor actor, Location loc, Material typeBefore, Material typeAfter, byte data, String signtext, ChestAccess ca) {
-
+    
+    }
+    
+    
+    private void queueBlock(Actor actor, BlockState before, BlockState after, ChestAccess ca) {
         if (Config.fireCustomEvents) {
             // Create and call the event
-            BlockChangePreLogEvent event = new BlockChangePreLogEvent(actor, loc, typeBefore, typeAfter, data, signtext, ca);
+            BlockChangePreLogEvent event = new BlockChangePreLogEvent(actor, before, after, ca);
             logblock.getServer().getPluginManager().callEvent(event);
             if (event.isCancelled()) {
                 return;
@@ -752,18 +811,15 @@ public class Consumer extends TimerTask {
 
             // Update variables
             actor = event.getOwnerActor();
-            loc = event.getLocation();
-            typeBefore = event.getTypeBefore();
-            typeAfter = event.getTypeAfter();
-            data = event.getData();
-            signtext = event.getSignText();
+            before = event.getBefore();
+            after = event.getAfter();
             ca = event.getChestAccess();
         }
         // Do this last so LogBlock still has final say in what is being added
-        if (actor == null || loc == null || typeBefore == null || typeAfter == null || hiddenPlayers.contains(actor.getName().toLowerCase()) || !isLogged(loc.getWorld()) || typeBefore != typeAfter && hiddenBlocks.contains(typeBefore) && hiddenBlocks.contains(typeAfter)) {
+        if (actor == null || before == null || after == null || hiddenPlayers.contains(actor.getName().toLowerCase()) || !isLogged(before.getLocation().getWorld()) || before.getType() != after.getType() && hiddenBlocks.contains(before.getType()) && hiddenBlocks.contains(after.getType())) {
             return;
         }
-        queue.add(new BlockRow(loc, actor, typeBefore, typeAfter, data, signtext, ca));
+        queue.add(new BlockRow(before.getLocation(), actor, before, after, ca));
     }
 
     private String playerID(Actor actor) {
@@ -813,8 +869,8 @@ public class Consumer extends TimerTask {
     private class BlockRow extends BlockChange implements MergeableRow {
         private Connection connection;
 
-        public BlockRow(Location loc, Actor actor, Material replaced, Material type, byte data, String signtext, ChestAccess ca) {
-            super(System.currentTimeMillis() / 1000, loc, actor, replaced, type, data, signtext, ca);
+        public BlockRow(Location loc, Actor actor, BlockState before, BlockState after, ChestAccess ca) {
+            super(System.currentTimeMillis() / 1000, loc, actor, before, after, ca);
         }
 
         @Override

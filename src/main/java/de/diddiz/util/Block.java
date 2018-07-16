@@ -4,6 +4,7 @@ import org.bukkit.Material;
 
 import java.util.List;
 
+// TODO: No magic data value
 public class Block {
     private Material type;
     private int data;

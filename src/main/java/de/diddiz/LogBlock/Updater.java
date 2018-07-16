@@ -403,6 +403,29 @@ class Updater {
             }
             config.set("version", "1.12.0");
         }
+    
+        if (configVersion.compareTo(new ComparableVersion("1.13.0")) < 0) {
+            getLogger().info("Updating tables to 1.13.0 ...");
+            try (final Connection conn = logblock.getConnection(); final Statement st = conn.createStatement()) {
+                conn.setAutoCommit(true);
+                for (final WorldConfig wcfg : getLoggedWorlds()) {
+                    st.execute("ALTER TABLE `" + wcfg.table + "` MODIFY COLUMN " +
+                            "`replaced` SMALLINT UNSIGNED NOT NULL, " +
+                            "`type` SMALLINT UNSIGNED NOT NULL, " +
+                            "`data` INT UNSIGNED NOT NULL");
+                    if (wcfg.isLogging(Logging.SIGNTEXT)) {
+                        st.execute("RENAME TABLE `" + wcfg.table + "-sign` TO `" + wcfg.table + "-data`");
+                        st.execute("ALTER TABLE `" + wcfg.table + "-data` CHANGE COLUMN `signtext` `data` VARCHAR(16383) NOT NULL");
+                    }
+                    // TODO: Add block data/state/whatever column and add sign texts there
+                }
+                
+            } catch (final SQLException ex) {
+                Bukkit.getLogger().log(Level.SEVERE, "[Updater] Error: ", ex);
+                return false;
+            }
+            config.set("version", "1.13.0");
+        }
 
         logblock.saveConfig();
         return true;
@@ -434,21 +457,73 @@ class Updater {
         final Statement state = conn.createStatement();
         final DatabaseMetaData dbm = conn.getMetaData();
         conn.setAutoCommit(true);
-        createTable(dbm, state, "lb-players", "(playerid INT UNSIGNED NOT NULL AUTO_INCREMENT, UUID varchar(36) NOT NULL, playername varchar(32) NOT NULL, firstlogin DATETIME NOT NULL, lastlogin DATETIME NOT NULL, onlinetime INT UNSIGNED NOT NULL, ip varchar(255) NOT NULL, PRIMARY KEY (playerid), INDEX (UUID), INDEX (playername)) DEFAULT CHARSET " + charset);
+        createTable(dbm, state, "lb-players", "(" +
+                "playerid INT UNSIGNED NOT NULL AUTO_INCREMENT, " +
+                "UUID char(36) NOT NULL, playername varchar(32) NOT NULL, " +
+                "firstlogin DATETIME NOT NULL, lastlogin DATETIME NOT NULL, " +
+                "onlinetime INT UNSIGNED NOT NULL, ip varchar(255) NOT NULL, " +
+                "PRIMARY KEY (playerid), INDEX (UUID), INDEX (playername)" +
+                ") DEFAULT CHARSET " + charset
+        );
         // Players table must not be empty or inserts won't work - bug #492
         final ResultSet rs = state.executeQuery("SELECT NULL FROM `lb-players` LIMIT 1;");
         if (!rs.next()) {
             state.execute("INSERT IGNORE INTO `lb-players` (UUID,playername) VALUES ('log_dummy_record','dummy_record')");
         }
         if (isLogging(Logging.CHAT)) {
-            createTable(dbm, state, "lb-chat", "(id INT UNSIGNED NOT NULL AUTO_INCREMENT, date DATETIME NOT NULL, playerid INT UNSIGNED NOT NULL, message VARCHAR(256) NOT NULL, PRIMARY KEY (id), KEY playerid (playerid), FULLTEXT message (message)) ENGINE=MyISAM DEFAULT CHARSET " + charset);
+            createTable(dbm, state, "lb-chat", "(" +
+                    "id INT UNSIGNED NOT NULL AUTO_INCREMENT, " +
+                    "date DATETIME NOT NULL, " +
+                    "playerid INT UNSIGNED NOT NULL, " +
+                    "message VARCHAR(256) NOT NULL, " +
+                    "PRIMARY KEY (id), KEY playerid (playerid), FULLTEXT message (message)" +
+                    ") ENGINE=MyISAM DEFAULT CHARSET " + charset
+            );
         }
         for (final WorldConfig wcfg : getLoggedWorlds()) {
-            createTable(dbm, state, wcfg.table, "(id INT UNSIGNED NOT NULL AUTO_INCREMENT, date DATETIME NOT NULL, playerid INT UNSIGNED NOT NULL, replaced TINYINT UNSIGNED NOT NULL, type TINYINT UNSIGNED NOT NULL, data TINYINT UNSIGNED NOT NULL, x MEDIUMINT NOT NULL, y SMALLINT UNSIGNED NOT NULL, z MEDIUMINT NOT NULL, PRIMARY KEY (id), KEY coords (x, z, y), KEY date (date), KEY playerid (playerid))");
-            createTable(dbm, state, wcfg.table + "-sign", "(id INT UNSIGNED NOT NULL, signtext VARCHAR(255) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARSET " + charset);
-            createTable(dbm, state, wcfg.table + "-chest", "(id INT UNSIGNED NOT NULL, itemtype SMALLINT UNSIGNED NOT NULL, itemamount SMALLINT NOT NULL, itemdata SMALLINT NOT NULL, PRIMARY KEY (id))");
+            createTable(dbm, state, wcfg.table, "(" +
+                    "id INT UNSIGNED NOT NULL AUTO_INCREMENT, " +
+                    "date DATETIME NOT NULL, " +
+                    "playerid INT UNSIGNED NOT NULL, " +
+                    "replaced SMALLINT UNSIGNED NOT NULL, " +
+                    "type SMALLINT UNSIGNED NOT NULL, " +
+                    "data INT UNSIGNED NOT NULL, " +
+                    "x MEDIUMINT NOT NULL, " +
+                    "y SMALLINT UNSIGNED NOT NULL, " +
+                    "z MEDIUMINT NOT NULL, " +
+                    "PRIMARY KEY (id), KEY coords (x, z, y), KEY date (date), KEY playerid (playerid)" +
+                    ")"
+            );
+            // TODO: Add block data/state/whatever column and remove sign text table
+            createTable(dbm, state, wcfg.table + "-data", "(" +
+                    "id INT UNSIGNED NOT NULL, " +
+                    "data VARCHAR(16383) NOT NULL, " +
+                    "PRIMARY KEY (id)" +
+                    ") DEFAULT CHARSET " + charset
+            );
+            if (wcfg.isLogging(Logging.CHESTACCESS)) {
+                createTable(dbm, state, wcfg.table + "-chest", "(" +
+                        "id INT UNSIGNED NOT NULL, " +
+                        "itemtype SMALLINT UNSIGNED NOT NULL, " +
+                        "itemamount SMALLINT NOT NULL, " +
+                        "itemdata SMALLINT NOT NULL, " +
+                        "PRIMARY KEY (id)" +
+                        ")"
+                );
+            }
             if (wcfg.isLogging(Logging.KILL)) {
-                createTable(dbm, state, wcfg.table + "-kills", "(id INT UNSIGNED NOT NULL AUTO_INCREMENT, date DATETIME NOT NULL, killer INT UNSIGNED, victim INT UNSIGNED NOT NULL, weapon SMALLINT UNSIGNED NOT NULL, x MEDIUMINT NOT NULL, y SMALLINT NOT NULL, z MEDIUMINT NOT NULL, PRIMARY KEY (id))");
+                createTable(dbm, state, wcfg.table + "-kills", "(" +
+                        "id INT UNSIGNED NOT NULL AUTO_INCREMENT, " +
+                        "date DATETIME NOT NULL, " +
+                        "killer INT UNSIGNED, " +
+                        "victim INT UNSIGNED NOT NULL, " +
+                        "weapon SMALLINT UNSIGNED NOT NULL, " +
+                        "x MEDIUMINT NOT NULL, " +
+                        "y SMALLINT NOT NULL, " +
+                        "z MEDIUMINT NOT NULL, " +
+                        "PRIMARY KEY (id)" +
+                        ")"
+                );
             }
         }
         state.close();

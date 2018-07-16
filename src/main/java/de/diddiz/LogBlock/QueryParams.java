@@ -16,7 +16,6 @@ import java.util.*;
 import static de.diddiz.LogBlock.Session.getSession;
 import static de.diddiz.LogBlock.config.Config.*;
 import static de.diddiz.util.BukkitUtils.friendlyWorldname;
-import static de.diddiz.util.BukkitUtils.getBlockEquivalents;
 import static de.diddiz.util.MaterialName.materialName;
 import static de.diddiz.util.MaterialName.typeFromName;
 import static de.diddiz.util.Utils.*;
@@ -198,7 +197,7 @@ public final class QueryParams implements Cloneable {
                 }
                 final String[] blocknames = new String[types.size()];
                 for (int i = 0; i < types.size(); i++) {
-                    blocknames[i] = materialName(types.get(i).getBlock());
+                    blocknames[i] = materialName(types.get(i).getType());
                 }
                 title.append(listing(blocknames, ", ", " and ")).append(" ");
             } else {
@@ -215,17 +214,17 @@ public final class QueryParams implements Cloneable {
         if (killers.size() > 10) {
             title.append(excludeKillersMode ? "without" : "from").append(" many killers ");
         } else if (!killers.isEmpty()) {
-            title.append(excludeKillersMode ? "without" : "from").append(" ").append(listing(killers.toArray(new String[killers.size()]), ", ", " and ")).append(" ");
+            title.append(excludeKillersMode ? "without" : "from").append(" ").append(listing(killers.toArray(new String[0]), ", ", " and ")).append(" ");
         }
         if (victims.size() > 10) {
             title.append(excludeVictimsMode ? "without" : "of").append(" many victims ");
         } else if (!victims.isEmpty()) {
-            title.append(excludeVictimsMode ? "without" : "of").append(" victim").append(victims.size() != 1 ? "s" : "").append(" ").append(listing(victims.toArray(new String[victims.size()]), ", ", " and ")).append(" ");
+            title.append(excludeVictimsMode ? "without" : "of").append(" victim").append(victims.size() != 1 ? "s" : "").append(" ").append(listing(victims.toArray(new String[0]), ", ", " and ")).append(" ");
         }
         if (players.size() > 10) {
             title.append(excludePlayersMode ? "without" : "from").append(" many players ");
         } else if (!players.isEmpty()) {
-            title.append(excludePlayersMode ? "without" : "from").append(" player").append(players.size() != 1 ? "s" : "").append(" ").append(listing(players.toArray(new String[players.size()]), ", ", " and ")).append(" ");
+            title.append(excludePlayersMode ? "without" : "from").append(" player").append(players.size() != 1 ? "s" : "").append(" ").append(listing(players.toArray(new String[0]), ", ", " and ")).append(" ");
         }
         if (match != null && match.length() > 0) {
             title.append("matching '").append(match).append("' ");
@@ -626,13 +625,6 @@ public final class QueryParams implements Cloneable {
                 }
                 for (final String weaponName : values) {
                     Material mat = Material.matchMaterial(weaponName);
-                    if (mat == null) {
-                        try {
-                            mat = Material.getMaterial(Integer.parseInt(weaponName));
-                        } catch (NumberFormatException e) {
-                            throw new IllegalArgumentException("Data type not a valid number: '" + weaponName + "'");
-                        }
-                    }
                     if (mat == null) {
                         throw new IllegalArgumentException("No material matching: '" + weaponName + "'");
                     }

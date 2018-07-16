@@ -1,6 +1,7 @@
 package de.diddiz.LogBlock.config;
 
 import de.diddiz.LogBlock.*;
+import de.diddiz.util.BukkitUtils;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -32,10 +33,10 @@ public class Config {
     public static boolean dumpDeletedLog;
     public static boolean logCreeperExplosionsAsPlayerWhoTriggeredThese, logPlayerInfo;
     public static LogKillsLevel logKillsLevel;
-    public static Set<Integer> dontRollback, replaceAnyway;
+    public static Set<Material> dontRollback, replaceAnyway;
     public static int rollbackMaxTime, rollbackMaxArea;
     public static Map<String, Tool> toolsByName;
-    public static Map<Integer, Tool> toolsByType;
+    public static Map<Material, Tool> toolsByType;
     public static int defaultDist, defaultTime;
     public static int linesPerPage, linesLimit;
     public static boolean askRollbacks, askRedos, askClearLogs, askClearLogAfterRollback, askRollbackAfterBan;
@@ -169,12 +170,38 @@ public class Config {
                 throw new DataFormatException("Not a valid material: '" + blocktype + "'");
             }
         }
-        ignoredChat = new HashSet<String>();
+        ignoredChat = new HashSet<>();
         for (String chatCommand : config.getStringList("logging.ignoredChat")) {
             ignoredChat.add(chatCommand);
         }
-        dontRollback = new HashSet<Integer>(config.getIntegerList("rollback.dontRollback"));
-        replaceAnyway = new HashSet<Integer>(config.getIntegerList("rollback.replaceAnyway"));
+        dontRollback = EnumSet.noneOf(Material.class);
+        for (String matName : config.getStringList("rollback.dontRollback")) {
+            Material mat = Material.matchMaterial(matName);
+            if (mat == null) {
+                try {
+                    mat = BukkitUtils.getMaterialById(Integer.parseInt(matName));
+                } catch (NumberFormatException ignored) {}
+            }
+            if (mat != null) {
+                dontRollback.add(mat);
+            } else {
+                getLogger().log(Level.WARNING, "Error at parsing dontRollback entry '" + matName + "': It's not a valid material!");
+            }
+        }
+        replaceAnyway = EnumSet.noneOf(Material.class);
+        for (String matName : config.getStringList("rollback.replaceAnyway")) {
+            Material mat = Material.matchMaterial(matName);
+            if (mat == null) {
+                try {
+                    mat = BukkitUtils.getMaterialById(Integer.parseInt(matName));
+                } catch (NumberFormatException ignored) {}
+            }
+            if (mat != null) {
+                replaceAnyway.add(mat);
+            } else {
+                getLogger().log(Level.WARNING, "Error at parsing replaceAnyway entry '" + matName + "': It's not a valid material!");
+            }
+        }
         rollbackMaxTime = parseTimeSpec(config.getString("rollback.maxTime").split(" "));
         rollbackMaxArea = config.getInt("rollback.maxArea", 50);
         defaultDist = config.getInt("lookup.defaultDist", 20);
@@ -197,7 +224,10 @@ public class Config {
                 final ToolBehavior leftClickBehavior = ToolBehavior.valueOf(tSec.getString("leftClickBehavior").toUpperCase());
                 final ToolBehavior rightClickBehavior = ToolBehavior.valueOf(tSec.getString("rightClickBehavior").toUpperCase());
                 final boolean defaultEnabled = tSec.getBoolean("defaultEnabled", false);
-                final int item = tSec.getInt("item", 0);
+                Material item = Material.matchMaterial(tSec.getString("item"));
+                if (item == null) {
+                    item = BukkitUtils.getMaterialById(tSec.getInt("item", 0));
+                }
                 final boolean canDrop = tSec.getBoolean("canDrop", false);
                 final QueryParams params = new QueryParams(logblock);
                 params.prepareToolQuery = true;
@@ -209,8 +239,8 @@ public class Config {
                 getLogger().log(Level.WARNING, "Error at parsing tool '" + toolName + "': ", ex);
             }
         }
-        toolsByName = new HashMap<String, Tool>();
-        toolsByType = new HashMap<Integer, Tool>();
+        toolsByName = new HashMap<>();
+        toolsByType = new EnumMap<>(Material.class);
         for (final Tool tool : tools) {
             toolsByType.put(tool.item, tool);
             toolsByName.put(tool.name.toLowerCase(), tool);
@@ -219,7 +249,7 @@ public class Config {
             }
         }
         final List<String> loggedWorlds = config.getStringList("loggedWorlds");
-        worldConfigs = new HashMap<String, WorldConfig>();
+        worldConfigs = new HashMap<>();
         if (loggedWorlds.isEmpty()) {
             throw new DataFormatException("No worlds configured");
         }
@@ -276,16 +306,17 @@ public class Config {
     public static Collection<WorldConfig> getLoggedWorlds() {
         return worldConfigs.values();
     }
+    
+    static class LoggingEnabledMapping {
+        private final boolean[] logging = new boolean[Logging.length];
+        
+        public void setLogging(Logging l, boolean enabled) {
+            logging[l.ordinal()] = enabled;
+        }
+        
+        public boolean isLogging(Logging l) {
+            return logging[l.ordinal()];
+        }
+    }
 }
 
-class LoggingEnabledMapping {
-    private final boolean[] logging = new boolean[Logging.length];
-
-    public void setLogging(Logging l, boolean enabled) {
-        logging[l.ordinal()] = enabled;
-    }
-
-    public boolean isLogging(Logging l) {
-        return logging[l.ordinal()];
-    }
-}

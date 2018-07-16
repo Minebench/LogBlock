@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class WorldConfig extends LoggingEnabledMapping {
+public class WorldConfig extends Config.LoggingEnabledMapping {
     public final String table;
 
     public WorldConfig(File file) throws IOException {

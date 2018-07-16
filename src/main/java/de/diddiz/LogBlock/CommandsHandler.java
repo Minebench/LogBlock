@@ -459,7 +459,7 @@ public class CommandsHandler implements CommandExecutor {
                     params.needType = true;
                     params.needData = true;
                     params.needPlayer = true;
-                    if (params.types.isEmpty() || Block.inList(params.types, Material.SIGN_POST) || Block.inList(params.types, Material.WALL_SIGN)) {
+                    if (params.types.isEmpty() || Block.inList(params.types, Material.SIGN) || Block.inList(params.types, Material.WALL_SIGN)) {
                         params.needSignText = true;
                     }
                     if (params.bct == BlockChangeType.CHESTACCESS || params.bct == BlockChangeType.ALL) {
@@ -524,7 +524,7 @@ public class CommandsHandler implements CommandExecutor {
                     params.needType = true;
                     params.needData = true;
                     params.needPlayer = true;
-                    if (params.types.isEmpty() || Block.inList(params.types, Material.SIGN_POST) || Block.inList(params.types, Material.WALL_SIGN)) {
+                    if (params.types.isEmpty() || Block.inList(params.types, Material.SIGN) || Block.inList(params.types, Material.WALL_SIGN)) {
                         params.needSignText = true;
                     }
                     if (params.bct == BlockChangeType.CHESTACCESS || params.bct == BlockChangeType.ALL) {

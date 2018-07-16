@@ -32,7 +32,7 @@ public class BlockPlaceLogging extends LoggingListener {
             final Actor actor = Actor.actorFromEntity(event.getPlayer());
 
             //Handle falling blocks
-            if (BukkitUtils.getRelativeTopFallables().contains(type)) {
+            if (type.hasGravity()) {
 
                 // Catch placed blocks overwriting something
                 if (before.getType() != Material.AIR) {

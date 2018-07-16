@@ -2,9 +2,11 @@ package de.diddiz.LogBlock;
 
 import de.diddiz.LogBlock.config.Config;
 import de.diddiz.LogBlock.listeners.*;
+import de.diddiz.util.MaterialName;
 import de.diddiz.util.MySQLConnectionPool;
 import de.diddiz.worldedit.WorldEditLoggingHook;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -89,7 +91,7 @@ public class LogBlock extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        materialName(0);    // Force static code to run
+        MaterialName.materialName(Material.AIR);    // Force static code to run
         final PluginManager pm = getPluginManager();
         if (errorAtLoading) {
             pm.disablePlugin(this);

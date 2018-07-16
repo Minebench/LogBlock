@@ -191,7 +191,7 @@ public class WorldEditor implements Runnable {
                 }
                 return PerformResult.SUCCESS;
             }
-            if (!(equalTypes(block.getType(), type) || replaceAnyway.contains(block.getTypeId()))) {
+            if (!(equalTypes(block.getType(), type) || replaceAnyway.contains(block.getType()))) {
                 return PerformResult.NO_ACTION;
             }
             if (state instanceof InventoryHolder) {
@@ -221,19 +221,19 @@ public class WorldEditor implements Runnable {
             } else if (curtype == 26) {
                 final Bed bed = (Bed) block.getState().getData();
                 final Block secBlock = bed.isHeadOfBed() ? block.getRelative(bed.getFacing().getOppositeFace()) : block.getRelative(bed.getFacing());
-                if (secBlock.getTypeId() == 0 && !secBlock.setTypeIdAndData(26, (byte) (bed.getData() | 8), true)) {
+                if (secBlock.getType() == Material.AIR && !secBlock.setTypeIdAndData(26, (byte) (bed.getData() | 8), true)) {
                     throw new WorldEditorException(secBlock.getTypeId(), 26, secBlock.getLocation());
                 }
             } else if ((curtype == 29 || curtype == 33) && (block.getData() & 8) > 0) {
                 final PistonBaseMaterial piston = (PistonBaseMaterial) block.getState().getData();
                 final Block secBlock = block.getRelative(piston.getFacing());
-                if (secBlock.getTypeId() == 0 && !secBlock.setTypeIdAndData(34, curtype == 29 ? (byte) (block.getData() | 8) : (byte) (block.getData() & ~8), true)) {
+                if (secBlock.getType() == Material.AIR && !secBlock.setTypeIdAndData(34, curtype == 29 ? (byte) (block.getData() | 8) : (byte) (block.getData() & ~8), true)) {
                     throw new WorldEditorException(secBlock.getTypeId(), 34, secBlock.getLocation());
                 }
             } else if (curtype == 34) {
                 final PistonExtensionMaterial piston = (PistonExtensionMaterial) block.getState().getData();
                 final Block secBlock = block.getRelative(piston.getFacing().getOppositeFace());
-                if (secBlock.getTypeId() == 0 && !secBlock.setTypeIdAndData(piston.isSticky() ? 29 : 33, (byte) (block.getData() | 8), true)) {
+                if (secBlock.getType() == Material.AIR && !secBlock.setTypeIdAndData(piston.isSticky() ? 29 : 33, (byte) (block.getData() | 8), true)) {
                     throw new WorldEditorException(secBlock.getTypeId(), piston.isSticky() ? 29 : 33, secBlock.getLocation());
                 }
             } else if (curtype == 18 && (block.getData() & 8) > 0) {

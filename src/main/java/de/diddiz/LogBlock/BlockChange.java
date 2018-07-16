@@ -4,6 +4,7 @@ import de.diddiz.LogBlock.config.Config;
 import de.diddiz.util.BukkitUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockState;
 import org.bukkit.material.Button;
 import org.bukkit.material.Cake;
 import org.bukkit.material.Comparator;
@@ -26,22 +27,18 @@ public class BlockChange implements LookupCacheElement {
     public final Location loc;
     public final Actor actor;
     public final String playerName;
-    public final Material replaced, type;
-    public final byte data;
-    public final String signtext;
+    public final BlockState type, replaced;
     public final ChestAccess ca;
 
-    public BlockChange(long date, Location loc, Actor actor, Material replaced, Material type, byte data, String signtext, ChestAccess ca) {
+    public BlockChange(long date, Location loc, Actor actor, BlockState type, BlockState replaced, ChestAccess ca) {
         id = 0;
         this.date = date;
         this.loc = loc;
         this.actor = actor;
-        this.replaced = replaced;
-        this.type = type;
-        this.data = data;
-        this.signtext = checkText(signtext);
         this.ca = ca;
         this.playerName = actor == null ? null : actor.getName();
+        this.type = type;
+        this.replaced = replaced;
     }
 
     public BlockChange(ResultSet rs, QueryParams p) throws SQLException {

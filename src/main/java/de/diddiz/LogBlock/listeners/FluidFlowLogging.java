@@ -27,7 +27,7 @@ public class FluidFlowLogging extends LoggingListener {
             final Material typeFrom = event.getBlock().getType();
             final Material typeTo = to.getType();
             final boolean canFlow = typeTo == Material.AIR || getNonFluidProofBlocks().contains(typeTo);
-            if (typeFrom == Material.LAVA || typeFrom == Material.STATIONARY_LAVA) {
+            if (typeFrom == Material.LAVA) {
                 if (canFlow && wcfg.isLogging(Logging.LAVAFLOW)) {
                     if (isSurroundedByWater(to) && event.getBlock().getData() <= 2) {
                         consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), Material.COBBLESTONE, (byte) 0);
@@ -36,19 +36,19 @@ public class FluidFlowLogging extends LoggingListener {
                     } else {
                         consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), Material.LAVA, (byte) (event.getBlock().getData() + 1));
                     }
-                } else if (typeTo == Material.WATER || typeTo == Material.STATIONARY_WATER) {
+                } else if (typeTo == Material.WATER) {
                     if (event.getFace() == BlockFace.DOWN) {
                         consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), Material.STONE, (byte) 0);
                     } else {
                         consumer.queueBlockReplace(new Actor("LavaFlow"), to.getState(), Material.COBBLESTONE, (byte) 0);
                     }
                 }
-            } else if ((typeFrom == Material.WATER || typeFrom == Material.STATIONARY_WATER) && wcfg.isLogging(Logging.WATERFLOW)) {
+            } else if (typeFrom == Material.WATER && wcfg.isLogging(Logging.WATERFLOW)) {
                 if (typeTo == Material.AIR) {
                     consumer.queueBlockPlace(new Actor("WaterFlow"), to.getLocation(), Material.WATER, (byte) (event.getBlock().getData() + 1));
                 } else if (getNonFluidProofBlocks().contains(typeTo)) {
                     consumer.queueBlockReplace(new Actor("WaterFlow"), to.getState(), Material.WATER, (byte) (event.getBlock().getData() + 1));
-                } else if (typeTo == Material.LAVA || typeTo == Material.STATIONARY_LAVA) {
+                } else if (typeTo == Material.LAVA) {
                     if (to.getData() == 0) {
                         consumer.queueBlockReplace(new Actor("WaterFlow"), to.getState(), Material.OBSIDIAN, (byte) 0);
                     } else if (event.getFace() == BlockFace.DOWN) {
@@ -58,7 +58,7 @@ public class FluidFlowLogging extends LoggingListener {
                 if (typeTo == Material.AIR || getNonFluidProofBlocks().contains(typeTo)) {
                     for (final BlockFace face : new BlockFace[]{BlockFace.DOWN, BlockFace.NORTH, BlockFace.WEST, BlockFace.EAST, BlockFace.SOUTH}) {
                         final Block lower = to.getRelative(face);
-                        if (lower.getTypeId() == 10 || lower.getTypeId() == 11) {
+                        if (lower.getType() == Material.LAVA) {
                             consumer.queueBlockReplace(new Actor("WaterFlow"), lower.getState(), lower.getData() == 0 ? Material.OBSIDIAN : Material.COBBLESTONE, (byte) 0);
                         }
                     }
@@ -69,8 +69,7 @@ public class FluidFlowLogging extends LoggingListener {
 
     private static boolean isSurroundedByWater(Block block) {
         for (final BlockFace face : new BlockFace[]{BlockFace.NORTH, BlockFace.WEST, BlockFace.EAST, BlockFace.SOUTH}) {
-            final int type = block.getRelative(face).getTypeId();
-            if (type == 8 || type == 9) {
+            if (block.getRelative(face).getType() == Material.WATER) {
                 return true;
             }
         }

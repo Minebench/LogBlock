@@ -6,106 +6,169 @@ import de.diddiz.util.BukkitUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
 import org.bukkit.event.HandlerList;
-import org.bukkit.material.Sign;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class BlockChangePreLogEvent extends PreLogEvent {
 
     private static final HandlerList handlers = new HandlerList();
-    private Location location;
-    private Material typeBefore, typeAfter;
-    private byte data;
-    private String signText;
+    private BlockState before, after;
     private ChestAccess chestAccess;
-
-    @Deprecated
-    public BlockChangePreLogEvent(Actor owner, Location location, int typeBefore, int typeAfter, byte data,
-                                  String signText, ChestAccess chestAccess) {
-        this(owner, location, Material.getMaterial(typeBefore), Material.getMaterial(typeAfter), data, signText, chestAccess);
-    }
     
-    public BlockChangePreLogEvent(Actor owner, Location location, Material typeBefore, Material typeAfter, byte data,
-                                  String signText, ChestAccess chestAccess) {
+    public BlockChangePreLogEvent(Actor owner, BlockState before, BlockState after, ChestAccess chestAccess) {
         super(owner);
-        this.location = location;
-        this.typeBefore = typeBefore;
-        this.typeAfter = typeAfter;
-        this.data = data;
-        this.signText = signText;
+        this.before = before;
+        this.after = after;
         this.chestAccess = chestAccess;
     }
 
     public Location getLocation() {
 
-        return location;
+        return before.getLocation();
     }
 
+    @Deprecated
     public void setLocation(Location location) {
-
-        this.location = location;
+        
+        throw new UnsupportedOperationException("Setting the location of a BlockChangePreLogEvent is no longer supported!");
     }
-
     
+    public BlockState getBefore() {
+        
+        return before;
+    }
+    
+    public void setBefore(BlockState before) {
+        
+        this.before = before;
+    }
+    
+    public BlockState getAfter() {
+        
+        return after;
+    }
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
+    public void setAfter(BlockState after) {
+        
+        this.after = after;
+    }
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
     public Material getTypeBefore() {
 
-        return typeBefore;
+        return before.getType();
     }
-
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
     public void setTypeBefore(Material typeBefore) {
 
-        this.typeBefore = typeBefore;
+        before.setType(typeBefore);
     }
-
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
     public Material getTypeAfter() {
 
-        return typeAfter;
+        return before.getType();
     }
-
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
     public void setTypeAfter(Material typeAfter) {
 
-        this.typeAfter = typeAfter;
+        after.setType(typeAfter);
     }
-
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
     public byte getData() {
 
-        return data;
+        return before.getData().getData();
     }
-
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
     public void setData(byte data) {
 
-        this.data = data;
+        this.before.getData().setData(data);
     }
-
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
     public String getSignText() {
 
-        return signText;
+        if (before instanceof Sign) {
+            return Arrays.stream(((Sign) before).getLines()).collect(Collectors.joining("\0"));
+        } else if (after instanceof Sign) {
+            return Arrays.stream(((Sign) after).getLines()).collect(Collectors.joining("\0"));
+        }
+        return null;
     }
-
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
     public void setSignText(String[] signText) {
 
         if (signText != null) {
-            // Check for block
-            Validate.isTrue(isValidSign(), "Must be valid sign block");
-
             // Check for problems
             Validate.noNullElements(signText, "No null lines");
             Validate.isTrue(signText.length == 4, "Sign text must be 4 strings");
-
-            this.signText = signText[0] + "\0" + signText[1] + "\0" + signText[2] + "\0" + signText[3];
+    
+            if (before instanceof Sign) {
+                System.arraycopy(signText, 0, ((Sign) before).getLines(), 0, 4);
+            }
+            if (after instanceof Sign) {
+                System.arraycopy(signText, 0, ((Sign) after).getLines(), 0, 4);
+            }
         } else {
-            this.signText = null;
+            if (before instanceof Sign) {
+                Arrays.fill(((Sign) before).getLines(), "");
+            }
+            if (after instanceof Sign) {
+                Arrays.fill(((Sign) after).getLines(), "");
+            }
         }
     }
-
+    
+    /**
+     * @deprecated Directly use the BlockStates
+     */
+    @Deprecated
     private boolean isValidSign() {
 
-        if (BukkitUtils.equalTypes(Material.SIGN_POST, typeAfter) && typeBefore == Material.AIR) {
+        if (after instanceof Sign && before.getType() == Material.AIR) {
             return true;
         }
-        if (BukkitUtils.equalTypes(Material.SIGN_POST, typeBefore) && typeAfter == Material.AIR) {
+        if (before instanceof Sign && after.getType() == Material.AIR) {
             return true;
         }
-        if (BukkitUtils.equalTypes(Material.SIGN_POST, typeAfter) && typeBefore == typeAfter) {
+        if (after instanceof Sign && before instanceof Sign) {
             return true;
         }
         return false;
